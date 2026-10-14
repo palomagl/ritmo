@@ -1,7 +1,8 @@
-import { lazy, Suspense, useEffect, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useRef, type ReactNode } from "react";
 import { EstadoProvider, AvisosProvider, useEstado } from "@/app/estado";
 import { casar, navegar, useCaminho } from "@/app/rota";
 import { ERRO_CONFIG, MODO_DEMO } from "@/dados";
+import { sincronizarStrava } from "@/lib/strava";
 import { BarraInferior } from "@/componentes/BarraInferior";
 import { Marca } from "@/componentes/Icone";
 import { Esqueleto } from "@/componentes/basicos";
@@ -21,6 +22,7 @@ const Perguntar = lazy(() => import("@/telas/Perguntar"));
 const Agua = lazy(() => import("@/telas/Agua"));
 const Corpo = lazy(() => import("@/telas/Corpo"));
 const Perfil = lazy(() => import("@/telas/Perfil"));
+const StravaRetorno = lazy(() => import("@/telas/StravaRetorno"));
 
 /** Tela de espera: a marca no meio, sem piscar conteúdo pela metade. */
 function Abertura() {
@@ -57,6 +59,7 @@ const ROTAS: { padrao: string; tela: (p: Record<string, string>) => ReactNode; s
   { padrao: "/agua", tela: () => <Agua /> },
   { padrao: "/corpo", tela: () => <Corpo /> },
   { padrao: "/perfil", tela: () => <Perfil /> },
+  { padrao: "/strava", tela: () => <StravaRetorno />, semBarra: true },
 ];
 
 function Conteudo() {
@@ -66,6 +69,22 @@ function Conteudo() {
   // Atalhos antigos ou digitados: /mover vai para os passos; qualquer
   // caminho desconhecido volta para o Hoje.
   const conhecido = ROTAS.some((r) => casar(r.padrao, caminho));
+
+  // Corridas do Strava entram sozinhas: ao abrir o app e quando ele volta a
+  // aparecer na tela (no máximo uma busca a cada 20 minutos).
+  const temStrava = Boolean(perfil?.strava?.refreshToken);
+  const perfilAtual = useRef(perfil);
+  perfilAtual.current = perfil;
+  useEffect(() => {
+    if (!temStrava || MODO_DEMO) return;
+    // Sempre o perfil mais novo: o Strava pode trocar o token a cada busca.
+    const buscar = () => perfilAtual.current && void sincronizarStrava(perfilAtual.current).catch((e) => console.warn("Strava:", e));
+    buscar();
+    const aoVoltar = () => document.visibilityState === "visible" && buscar();
+    document.addEventListener("visibilitychange", aoVoltar);
+    return () => document.removeEventListener("visibilitychange", aoVoltar);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [temStrava]);
   useEffect(() => {
     if (caminho === "/mover") navegar("/mover/passos", { substituir: true });
     else if (!conhecido) navegar("/", { substituir: true });

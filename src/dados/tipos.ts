@@ -37,7 +37,16 @@ export interface Perfil {
   anelComida: "kcal" | "carbo";
   /** Hábito do Minha Rotina que marca sozinho ao bater a meta de água. */
   habitoAguaId: string | null;
+  /** Conexão com o Strava: as corridas de lá entram sozinhas. */
+  strava?: ConexaoStrava | null;
   boasVindasFeitas: boolean;
+}
+
+export interface ConexaoStrava {
+  refreshToken: string;
+  atleta: string;
+  /** Segundos desde 1970 da atividade mais recente já buscada. */
+  ultimaBusca: number | null;
 }
 
 export interface RegistroAgua {
@@ -141,7 +150,11 @@ export interface Corrida {
   kcalEstimada: number;
   /** Rota simplificada, codificada como polyline. */
   rota: string;
-  fonte: "gps" | "gpx";
+  fonte: "gps" | "gpx" | "strava";
+  /** Id da atividade no Strava, para não importar duas vezes. */
+  stravaId?: number;
+  /** Nome que a atividade tinha no Strava ("Corrida matinal"). */
+  nome?: string;
 }
 
 export interface Medida {

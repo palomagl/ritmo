@@ -33,6 +33,7 @@ O **ritmo** junta tudo numa tela só e tira o trabalho do caminho:
 - **Uma foto do prato** e a IA lista os alimentos, estima porções, calorias e macros, e diz se a refeição está dentro do seu plano.
 - **O plano da nutricionista vira o app.** Mande o PDF ou fotos: a IA organiza as refeições por horário, com as opções de substituição, e as metas do plano passam a ser as metas do dia.
 - **Os passos chegam sozinhos** do app Saúde do iPhone, várias vezes ao dia.
+- **As corridas vêm do Strava**: corra com a tela bloqueada ou com o relógio, e o trajeto, o pace e as parciais aparecem no ritmo.
 - **Água em um toque**, com o ritmo do dia: o app sabe se você está atrasada para a meta, e quanto.
 - **Corpo com contexto**: peso, gordura, músculo e água corporal com gráfico, e uma balança para anotar o peso em segundos.
 
@@ -57,7 +58,8 @@ O painel do dia. A **linha do tempo** mostra do acordar ao dormir, com um ponto 
 
 ### Mover
 - **Passos** do dia, da semana e do mês, com média, melhor dia e sequência na meta.
-- **Corrida com GPS**: mapa da rota, pace atual e médio, parciais por km, recordes e importação de GPX. A tela fica acesa durante a corrida.
+- **Corridas do Strava**: conecte uma vez e as corridas e caminhadas entram sozinhas, com mapa, pace e parciais por km.
+- **Corrida com GPS** direto no app, quando preferir: mapa da rota, pace atual e médio, parciais, recordes e importação de GPX.
 
 ### Corpo
 - **Balança**: anote o peso com um toque e veja a variação.
@@ -93,13 +95,14 @@ Vidro fosco sobre luz azul difusa, tipografia Inter, azul e azul-violeta como ma
 | IA | Firebase AI Logic + Gemini, respostas em JSON por schema, troca de modelo automática se um estiver lotado |
 | Proteção | App Check com Fraud Defense (reCAPTCHA Enterprise) |
 | Passos | Atalho do iPhone → função serverless `/api/passos` |
+| Corridas | Strava API (OAuth) → função serverless `/api/strava` |
 | Mapa | Leaflet + OpenStreetMap, com desenho em SVG quando não há internet |
 | Hospedagem | Vercel |
 
 As contas (distância por Haversine, filtro de GPS, parciais, ritmo da água, sequências, porções, pontos de atenção e o lembrete do dia) são funções puras em `src/lib`, cada uma com teste.
 
 ```
-api/            função que recebe os passos do Atalho
+api/            funções que recebem os passos do Atalho e buscam as corridas do Strava
 src/
   app/          estado global, rotas e ações compartilhadas
   componentes/  linha do dia, balança, gráficos, mapa, navegação, ícones
@@ -147,8 +150,12 @@ Importe o repositório (framework **Vite**) e cadastre as variáveis do `.env.ex
 | `VITE_FIREBASE_AUTH_DOMAIN` | O domínio da **Vercel** (não o `firebaseapp.com`): é o que faz o login funcionar no app instalado no iPhone |
 | `VITE_RECAPTCHA_ENTERPRISE_KEY` | A chave de site usada no App Check |
 | `VITE_GEMINI_MODEL` | Opcional. Padrão `gemini-3.5-flash-lite`, com `gemini-3.5-flash` de reserva |
+| `STRAVA_CLIENT_ID` e `STRAVA_CLIENT_SECRET` | Do app criado em strava.com/settings/api (só no servidor) |
 
 O `vercel.json` encaminha `/__/auth` para o `firebaseapp.com` do projeto. Se trocar de projeto Firebase, troque ali também.
+
+### Strava
+Em **strava.com/settings/api**, crie um app com o domínio da Vercel em *Authorization Callback Domain*. Cadastre o Client ID e o Client Secret na Vercel e, no ritmo, toque em **Perfil → Strava → Conectar**.
 
 ### Passos do iPhone
 No app, **Perfil → Passos do iPhone** mostra o endereço e o token para copiar. O Atalho tem só três ações: *Localizar Amostras de Saúde* (Passos, hoje), *Calcular Estatísticas* (Soma) e *Obter Conteúdo do URL* (POST, JSON com `passos` e `token`). Uma automação por horário faz o resto.

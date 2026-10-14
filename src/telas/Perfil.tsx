@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { dados, MODO_DEMO, MODO_PESSOAL, type DadosAtalho, type HabitoRotina, type Metas, type Tema } from "@/dados";
+import { dados, MODO_DEMO, type DadosAtalho, type HabitoRotina, type Metas, type Tema } from "@/dados";
 import { useAvisos, useEstado } from "@/app/estado";
 import { Folha, Topo } from "@/componentes/basicos";
 import { Icone } from "@/componentes/Icone";
+import { conectarStrava, desconectarStrava, sincronizarStrava } from "@/lib/strava";
 import { formatarMl } from "@/lib/agua";
 import { milhar } from "@/lib/passos";
 
@@ -96,8 +97,6 @@ export default function Perfil() {
         </div>
       </section>
 
-      {!MODO_PESSOAL && (
-        <>
       <p className="rotulo-secao">Integrações</p>
       <button className="card card-toque linha cor-passos" onClick={() => setAtalho(true)}>
         <span className="selo-icone"><Icone nome="pegadas" tamanho={18} /></span>
@@ -108,6 +107,8 @@ export default function Perfil() {
         </span>
         <Icone nome="seta" tamanho={18} className="suave" />
       </button>
+
+      <CartaoStrava />
 
       <section className="card cor-agua">
         <div className="card-cabeca">
@@ -135,19 +136,15 @@ export default function Perfil() {
         )}
       </section>
 
-        </>
-      )}
 
       <p className="rotulo-secao">Seus dados</p>
-      {!MODO_PESSOAL && (
-        <button className="botao contorno" onClick={exportar}>
-          <Icone nome="baixar" tamanho={18} /> Exportar tudo (JSON)
-        </button>
-      )}
+      <button className="botao contorno" onClick={exportar}>
+        <Icone nome="baixar" tamanho={18} /> Exportar tudo (JSON)
+      </button>
       <button className="botao perigo" onClick={() => dados.sair()}>
         <Icone nome="sair" tamanho={18} /> Sair da conta
       </button>
-      <p className="legenda" style={{ textAlign: "center" }}>{MODO_PESSOAL ? "Seus registros ficam guardados na sua conta do Claude." : `Ritmo 1.0${MODO_DEMO ? " · modo demonstração" : ""}`}</p>
+      <p className="legenda" style={{ textAlign: "center" }}>{`ritmo 1.0${MODO_DEMO ? " · modo demonstração" : ""}`}</p>
 
       <EditarMetas aberto={editandoMetas} aoFechar={() => setEditandoMetas(false)} metas={m} copos={perfil.copos} acordaH={perfil.acordaH} dormeH={perfil.dormeH} aoSalvar={() => avisar("Metas salvas")} />
       <GuiaAtalho aberto={atalho} aoFechar={() => setAtalho(false)} />
@@ -242,6 +239,57 @@ function EditarMetas({
         </button>
       </div>
     </Folha>
+  );
+}
+
+/** Conectar o Strava: as corridas gravadas lá entram sozinhas no ritmo. */
+function CartaoStrava() {
+  const { perfil } = useEstado();
+  const avisar = useAvisos();
+  const [buscando, setBuscando] = useState(false);
+  if (!perfil) return null;
+  const conexao = perfil.strava;
+
+  const sincronizar = async () => {
+    setBuscando(true);
+    try {
+      const n = await sincronizarStrava(perfil, true);
+      avisar(n ? `${n} ${n === 1 ? "atividade importada" : "atividades importadas"} do Strava` : "Nenhuma corrida nova no Strava");
+    } catch (e) {
+      avisar((e as Error).message);
+    } finally {
+      setBuscando(false);
+    }
+  };
+
+  return (
+    <section className="card cor-strava">
+      <div className="card-cabeca">
+        <span className="selo-icone"><Icone nome="rota" tamanho={18} /></span>
+        <div className="cresce">
+          <b>Strava</b>
+          <p className="legenda" style={{ margin: 0 }}>
+            {conexao
+              ? `Conectado${conexao.atleta ? ` como ${conexao.atleta}` : ""}. Corridas e caminhadas entram sozinhas, com mapa e parciais.`
+              : "Corra com o Strava (tela bloqueada ou relógio) e as corridas entram aqui sozinhas."}
+          </p>
+        </div>
+      </div>
+      {conexao ? (
+        <div className="grade-2">
+          <button className="botao secundario" onClick={sincronizar} disabled={buscando}>
+            <Icone nome="atualizar" tamanho={18} /> {buscando ? "Buscando…" : "Buscar agora"}
+          </button>
+          <button className="botao texto" onClick={() => { void desconectarStrava(); avisar("Strava desconectado"); }}>
+            Desconectar
+          </button>
+        </div>
+      ) : (
+        <button className="botao cor cor-strava cheio" onClick={conectarStrava}>
+          Conectar com Strava
+        </button>
+      )}
+    </section>
   );
 }
 
