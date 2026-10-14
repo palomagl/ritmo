@@ -51,9 +51,9 @@ No primeiro acesso do modo publicado, o plano da nutricionista, a meta de 1.500 
 
 ### 1. Firebase
 
-**Recomendado: usar o mesmo projeto do Minha Rotina** (`minha-rotina-4524d`). O login já funciona, as regras já protegem tudo embaixo de `users/{uid}`, e o Ritmo consegue marcar o hábito de água lá. O Ritmo grava em coleções próprias (`pulsoDias`, `pulsoRefeicoes`, `pulsoPlano`, `pulsoFavoritos`, `pulsoCorridas`, `pulsoMedidas`) e no campo `pulso` do perfil, então nada colide.
+O Ritmo usa o projeto próprio **`ritmo-77`**: ative **Authentication → Google**, crie o **Firestore** (`southamerica-east1`) e publique o `firestore.rules`. O `vercel.json` encaminha `/__/auth` para `ritmo-77.firebaseapp.com`; se trocar de projeto, troque ali também.
 
-Se preferir um projeto separado: crie o projeto, ative **Authentication → Google**, crie o **Firestore** (`southamerica-east1`), publique o `firestore.rules` e troque o domínio no `vercel.json`.
+A marcação automática do hábito de água no Minha Rotina só funciona quando os dois apps usam o mesmo projeto Firebase.
 
 ### 2. IA (Gemini pelo Firebase AI Logic)
 
