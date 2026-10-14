@@ -1,112 +1,171 @@
 <div align="center">
 
-# Ritmo
+<img src="public/favicon.svg" width="88" alt="ritmo" />
 
-### Seu corpo, no seu ritmo: passos, corridas, comida com IA, água e corpo num app só.
+# ritmo
+
+### Saúde do dia a dia num app só: passos, água, comida com IA, corpo e corridas.
+
+**Beba água. Cuide do seu ritmo.**
+
+[![Abrir o ritmo](https://img.shields.io/badge/▶_Abrir_o_ritmo-6366F1?style=for-the-badge)](https://ritmo-tau-inky.vercel.app/)
 
 ![React](https://img.shields.io/badge/React-20232a?style=flat-square&logo=react&logoColor=61DAFB)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-039BE5?style=flat-square&logo=firebase&logoColor=white)
-![Gemini](https://img.shields.io/badge/Gemini-AI_Logic-8E75B2?style=flat-square)
-![PWA](https://img.shields.io/badge/PWA-instalável-FF5A4E?style=flat-square)
+![Gemini](https://img.shields.io/badge/IA-Gemini-8E75B2?style=flat-square)
+![PWA](https://img.shields.io/badge/PWA-instalável-3B82F6?style=flat-square)
 
-![Telas do Ritmo](docs/telas.png)
+<br />
+
+![O ritmo no computador e no celular](docs/hero.png)
 
 </div>
 
-## O que tem dentro
+## O problema
 
-| Módulo | O que faz |
-| --- | --- |
-| **Hoje** | 3 anéis (passos, água, comida), a frase útil do dia, água em 1 toque, a próxima refeição do plano e a última corrida. |
-| **Passos** | Total do dia, semana e mês com a meta, média, melhor dia e sequência. Vêm do app Saúde por um Atalho do iPhone. |
-| **Corrida** | GPS com mapa, tempo, pace atual e médio, pausa, parciais por km, recordes e importação de GPX. A tela fica acesa durante a corrida. |
-| **Comer** | Foto do prato → a IA lista os alimentos, estima calorias e macros e compara com o seu plano. Você corrige as porções antes de salvar. Também dá para descrever em texto, perguntar e salvar pratos frequentes. |
-| **Meu plano** | Mande o PDF ou as fotos do plano da nutricionista: a IA organiza por refeição e horário, e as metas do plano viram as metas do app. |
-| **Água** | Copos personalizados, desfazer, ritmo do dia e sequência. Ao bater a meta, marca o hábito no **Minha Rotina**. |
-| **Corpo** | Peso, gordura, água corporal, músculo e cintura com gráfico e meta. Gera os pontos de atenção que a IA usa nas dicas. |
+Quem segue um plano alimentar e tenta se mexer mais acaba com cinco apps abertos: um para a água, um para os passos, outro para contar calorias, uma planilha para o peso e o PDF da nutricionista perdido no WhatsApp. Nenhum conversa com o outro, e anotar tudo vira trabalho.
 
-Funciona offline (registra sem internet e sincroniza depois) e tem tema claro e escuro.
+## A solução
 
-## Ver as telas agora (sem configurar nada)
+O **ritmo** junta tudo numa tela só e tira o trabalho do caminho:
 
-```bash
-npm install
-npm run demo
-```
+- **Uma foto do prato** e a IA lista os alimentos, estima porções, calorias e macros, e diz se a refeição está dentro do seu plano.
+- **O plano da nutricionista vira o app.** Mande o PDF ou fotos: a IA organiza as refeições por horário, com as opções de substituição, e as metas do plano passam a ser as metas do dia.
+- **Os passos chegam sozinhos** do app Saúde do iPhone, várias vezes ao dia.
+- **Água em um toque**, com o ritmo do dia: o app sabe se você está atrasada para a meta, e quanto.
+- **Corpo com contexto**: peso, gordura, músculo e água corporal com gráfico, e uma balança para anotar o peso em segundos.
 
-Abre em `http://localhost:5180` com uma semana de dados de exemplo e a IA simulada.
+Tudo isso com a cara de um app nativo: instala na tela inicial do iPhone, abre em tela cheia e funciona offline.
 
-## Três jeitos de rodar
+<div align="center">
 
-| Modo | Como | Dados |
-| --- | --- | --- |
-| **Publicado** | Vercel + Firebase (abaixo) | Firestore, login Google, IA Gemini, passos do iPhone |
-| **Demo** | `npm run demo` | Exemplo, no navegador |
-| **Pessoal no Claude** | build com `--mode pessoal`, publicado como página do Claude | Na conta do Claude, IA do Claude |
+![Telas do ritmo no celular](docs/telas.png)
 
-No primeiro acesso do modo publicado, o plano da nutricionista, a meta de 1.500 kcal e a bioimpedância de 01/10 entram sozinhos (`src/dados/paloma.ts`).
+</div>
 
-## Colocar no ar
+## Funcionalidades
 
-### 1. Firebase
+### Hoje
+O painel do dia. A **linha do tempo** mostra do acordar ao dormir, com um ponto colorido para cada registro e um marcador no agora. Logo abaixo, passos, água e comida com barras de progresso, um **lembrete inteligente** ("Faltam **900 ml** para ficar no ritmo da água") e a próxima refeição do plano.
 
-O Ritmo usa o projeto próprio **`ritmo-77`**: ative **Authentication → Google**, crie o **Firestore** (`southamerica-east1`) e publique o `firestore.rules`. O `vercel.json` encaminha `/__/auth` para `ritmo-77.firebaseapp.com`; se trocar de projeto, troque ali também.
+### Comer
+- **Foto do prato** com análise por IA e revisão das porções antes de salvar.
+- **Descrever em texto** ("2 ovos e 1 pão francês") quando não dá para fotografar.
+- **Perguntar**: dúvidas rápidas respondidas com base no seu plano ("posso trocar arroz por batata?").
+- **Pratos frequentes** com um toque, e fotos sem internet que esperam na fila para analisar depois.
 
-A marcação automática do hábito de água no Minha Rotina só funciona quando os dois apps usam o mesmo projeto Firebase.
+### Mover
+- **Passos** do dia, da semana e do mês, com média, melhor dia e sequência na meta.
+- **Corrida com GPS**: mapa da rota, pace atual e médio, parciais por km, recordes e importação de GPX. A tela fica acesa durante a corrida.
 
-### 2. IA (Gemini pelo Firebase AI Logic)
+### Corpo
+- **Balança**: anote o peso com um toque e veja a variação.
+- **Bioimpedância**: tire foto do laudo e a IA preenche peso, gordura, músculo e água.
+- **Pontos de atenção** a partir das suas metas, que a IA leva em conta nas dicas de comida.
 
-1. Console do Firebase → **AI Logic** → Começar → **Gemini Developer API** (grátis, plano Spark).
-2. **App Check** (obrigatório para a IA a partir de 02/11/2026): Console → App Check → registre o app web com **reCAPTCHA v3** (grátis) ou reCAPTCHA Enterprise e cole a chave do site em `VITE_RECAPTCHA_V3_KEY` (ou `VITE_RECAPTCHA_ENTERPRISE_KEY`). Depois, em App Check → APIs → Firebase AI Logic, clique em **Aplicar**.
-3. Para testar no computador com o App Check ligado: rode `npm run dev`, copie o token de depuração que aparece no console do navegador e cadastre em App Check → Apps → Gerenciar tokens de depuração.
+### Água
+Copos personalizados, desfazer, histórico de 7 e 30 dias e sequência de dias na meta.
 
-O modelo vem de `VITE_GEMINI_MODEL` (padrão `gemini-3.5-flash-lite`, com o `gemini-3.5-flash` de reserva). Quando o Google aposentar um modelo, troque a variável na Vercel e publique de novo.
+## Design
 
-> No nível grátis, o Google pode usar o que é enviado à IA para melhorar os produtos dele. Foto de prato tudo bem; no plano alimentar, apague nome, CPF e contatos; o laudo de bioimpedância dá para digitar em vez de mandar a foto.
+Vidro fosco sobre luz azul difusa, tipografia Inter, azul e azul-violeta como marca e uma cor por área (verde para passos, azul para água, laranja para comida, violeta para o corpo).
 
-### 3. Vercel
+- **Celular:** barra de navegação flutuante, botão central para registrar qualquer coisa.
+- **Notebook e PC:** navegação lateral e o Hoje vira um painel em colunas.
+- **Claro e escuro**, seguindo o sistema ou escolhido no Perfil.
+- Ícone e telas de abertura próprios para o iPhone.
 
-1. Suba a pasta para um repositório `ritmo` no GitHub e importe na Vercel (Framework: Vite).
-2. Em **Settings → Environment Variables**, cadastre as variáveis do `.env.example`. Em `VITE_FIREBASE_AUTH_DOMAIN` use o domínio do Ritmo na Vercel (ex.: `ritmo-paloma.vercel.app`): o `vercel.json` encaminha `/__/auth` para o Firebase, que é o que faz o login funcionar no app da tela inicial do iPhone.
-3. No Firebase: **Authentication → Settings → Authorized domains** → adicione o domínio do Ritmo.
-4. No Google Cloud (APIs e serviços → Credenciais → o cliente OAuth "Web client (auto created by Google Service)"): adicione `https://SEU-DOMINIO/__/auth/handler` em **URIs de redirecionamento autorizados**.
-5. Abra no Safari do iPhone → Compartilhar → **Adicionar à Tela de Início**.
+## Privacidade
 
-### 4. Passos do iPhone
-
-No app: **Perfil → Passos do iPhone**. O passo a passo do Atalho está lá, com os valores prontos para copiar. O Atalho lê o app Saúde e grava pela API REST do Firestore entrando com o seu próprio token, então as regras de segurança continuam valendo.
+- Cada pessoa só enxerga os próprios dados: as regras do banco bloqueiam qualquer acesso que não seja o da dona da conta.
+- A IA é protegida por **App Check**: só o app publicado consegue usá-la.
+- O token dos passos é pessoal, pode ser trocado a qualquer momento e só grava os passos do dia.
 
 ## Como é feito
 
 | Camada | Escolha |
 | --- | --- |
-| Frontend | React · Vite · TypeScript · CSS próprio (sem framework) |
-| Login | Firebase Auth (Google), redirect no celular |
+| Interface | React 18 · Vite · TypeScript · CSS próprio, sem framework visual |
+| App instalável | PWA com cache offline e telas de abertura do iOS |
+| Login | Firebase Authentication (Google) |
 | Banco | Cloud Firestore com cache offline |
-| IA | Firebase AI Logic + Gemini, com resposta em JSON por schema |
-| Mapa | Leaflet + OpenStreetMap (e um desenho em SVG quando não há internet) |
-| Deploy | Vercel |
+| IA | Firebase AI Logic + Gemini, respostas em JSON por schema, troca de modelo automática se um estiver lotado |
+| Proteção | App Check com Fraud Defense (reCAPTCHA Enterprise) |
+| Passos | Atalho do iPhone → função serverless `/api/passos` |
+| Mapa | Leaflet + OpenStreetMap, com desenho em SVG quando não há internet |
+| Hospedagem | Vercel |
 
-As contas (distância por Haversine, filtro de GPS, parciais, ritmo da água, sequências, porções, pontos de atenção, insight do dia) moram em funções puras em `src/lib`, testadas com `npm test`.
+As contas (distância por Haversine, filtro de GPS, parciais, ritmo da água, sequências, porções, pontos de atenção e o lembrete do dia) são funções puras em `src/lib`, cada uma com teste.
 
 ```
+api/            função que recebe os passos do Atalho
 src/
-  app/          estado global, rotas, ações compartilhadas
-  componentes/  anel, gráficos, mapa, barra inferior, ícones
-  dados/        Firestore de verdade e o modo demonstração (mesma interface)
-  ia/           prompts e a chamada ao Gemini
+  app/          estado global, rotas e ações compartilhadas
+  componentes/  linha do dia, balança, gráficos, mapa, navegação, ícones
+  dados/        Firestore e o modo demonstração (mesma interface)
+  ia/           prompts e chamadas ao Gemini
   lib/          as contas, cada uma com teste
   telas/        uma tela por arquivo
 ```
 
-## Comandos
+## Rodar no computador
+
+```bash
+npm install
+npm run demo   # dados de exemplo, sem configurar nada
+npm run dev    # com o Firebase de verdade (precisa do .env)
+```
 
 | Comando | Para quê |
 | --- | --- |
-| `npm run dev` | Rodar com o Firebase de verdade |
-| `npm run demo` | Rodar com dados de exemplo |
+| `npm run demo` | Ver todas as telas com uma semana de dados de exemplo |
+| `npm run dev` | Rodar com Firebase, login e IA |
 | `npm run build` | Gerar a versão de produção |
 | `npm test` | Rodar os testes |
 | `npm run typecheck` | Checar os tipos |
 | `npm run icones` | Regerar ícones e telas de abertura a partir de `public/logo.svg` |
+
+## Publicar
+
+### Firebase
+1. Crie o projeto, ative **Authentication → Google** e crie o **Firestore** (edição Standard, `southamerica-east1`).
+2. Cole o conteúdo de `firestore.rules` na aba **Regras** do Firestore e publique.
+3. **AI Logic → Começar → Gemini Developer API** (funciona no plano grátis).
+4. **App Check → Apps →** registre o app web com **Fraud Defense** usando a chave de site do reCAPTCHA (criada em Google Cloud → Segurança → reCAPTCHA, tipo Web, sem desafio de caixa).
+5. **Authentication → Configurações → Domínios autorizados:** adicione o domínio da Vercel.
+
+### Google Cloud
+Em **APIs e serviços → Credenciais → Web client (auto created by Google Service)**, adicione o domínio em *Origens JavaScript autorizadas* e `https://SEU-DOMINIO/__/auth/handler` em *URIs de redirecionamento autorizados*.
+
+### Vercel
+Importe o repositório (framework **Vite**) e cadastre as variáveis do `.env.example`:
+
+| Variável | Valor |
+| --- | --- |
+| `VITE_FIREBASE_*` | A config do app web do Firebase |
+| `VITE_FIREBASE_AUTH_DOMAIN` | O domínio da **Vercel** (não o `firebaseapp.com`): é o que faz o login funcionar no app instalado no iPhone |
+| `VITE_RECAPTCHA_ENTERPRISE_KEY` | A chave de site usada no App Check |
+| `VITE_GEMINI_MODEL` | Opcional. Padrão `gemini-3.5-flash-lite`, com `gemini-3.5-flash` de reserva |
+
+O `vercel.json` encaminha `/__/auth` para o `firebaseapp.com` do projeto. Se trocar de projeto Firebase, troque ali também.
+
+### Passos do iPhone
+No app, **Perfil → Passos do iPhone** mostra o endereço e o token para copiar. O Atalho tem só três ações: *Localizar Amostras de Saúde* (Passos, hoje), *Calcular Estatísticas* (Soma) e *Obter Conteúdo do URL* (POST, JSON com `passos` e `token`). Uma automação por horário faz o resto.
+
+## Próximos passos
+
+- Lembretes de água e de refeição por notificação.
+- Resumo semanal com o que melhorou e o que vale ajustar.
+- Compartilhar o progresso com a nutricionista.
+- Planos para mais de uma pessoa (hoje o app é pessoal).
+
+---
+
+<div align="center">
+
+**ritmo** · pequenos hábitos, grandes resultados.
+
+© 2026 Paloma Lorenzon. Todos os direitos reservados.
+
+</div>
