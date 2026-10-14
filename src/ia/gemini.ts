@@ -14,7 +14,7 @@ import type { Plano, RefeicaoPlano, TipoRefeicao } from "@/dados/tipos";
 import { PROMPT_LAUDO, PROMPT_PERGUNTA, PROMPT_PLANO, PROMPT_PRATO, PROMPT_TEXTO } from "./prompts";
 import { ErroIA, type AnalisePrato, type IA, type LeituraLaudo } from "./tipos";
 
-const MODELO = (import.meta.env.VITE_GEMINI_MODEL as string | undefined) || "gemini-3.8-flash";
+const MODELO = (import.meta.env.VITE_GEMINI_MODEL as string | undefined) || "gemini-3.5-flash";
 
 // Raciocínio baixo: a resposta da foto sai mais rápida e gasta menos. O enum
 // só existe nas versões novas do SDK; nas antigas, o texto "LOW" vale igual.
