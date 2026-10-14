@@ -140,7 +140,7 @@ body {
   overscroll-behavior-y: none;
 }
 /* Luz ambiente: manchas de cor atrás de tudo, para o vidro ter o que
-   refratar. Ficam paradas enquanto a tela rola e flutuam devagar. */
+   refratar. Ficam paradas enquanto a tela rola (sem animação: no PC pesava). */
 body::before,
 body::after {
   content: "";
@@ -158,17 +158,10 @@ body::before {
     radial-gradient(30% 24% at 100% 86%, var(--amb-6), transparent 72%),
     radial-gradient(60% 40% at 40% 40%, var(--amb-5), transparent 72%),
     linear-gradient(180deg, color-mix(in srgb, var(--amb-2) 40%, transparent), transparent 40%);
-  filter: blur(26px);
-  animation: flutuar 40s ease-in-out infinite alternate;
 }
 /* Um véu claro por cima das cores, para o texto nunca brigar com o fundo. */
 body::after {
   display: none;
-}
-@keyframes flutuar {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(-3%, 2%, 0) scale(1.05); }
-  100% { transform: translate3d(2%, -2%, 0) scale(1); }
 }
 body {
   font-size: 15px;
