@@ -1,93 +1,120 @@
 /* ==============================================
-   Pulso: estilos
+   ritmo: estilos
    ==============================================
-   Cada módulo tem a sua cor e ela só aparece nele. O resto é neutro e
-   quente, para os números se destacarem. Tokens primeiro; componentes
-   depois, na ordem em que aparecem na tela. */
+   Vidro fosco sobre luz azul difusa. O vidro fica nos cartões principais,
+   na navegação e em poucos controles; dentro deles, superfícies mais
+   simples, para a hierarquia ficar clara. Azul e azul-violeta são a marca;
+   verde, azul, laranja e violeta são de cada módulo. Tokens primeiro;
+   componentes depois, na ordem em que aparecem na tela. */
 
 :root {
-  /* Claro: fundo cinza-frio agrupado, cartões brancos sem sombra, tinta
-     quase preta. A cor fica para o que importa: cada módulo e a marca. */
-  --fundo: #eef0f6;
+  --fundo: #eef3fa;
   --card: #ffffff;
-  --card-2: #ececf1;
-  --texto: #14151a;
-  --texto-suave: #6e717c;
-  --linha: #e3e3e9;
-  --pulso: #ff4d42;
-  --pulso-texto: #e2382e;
-  --passos: #10a36a;
-  --agua: #2d7cf6;
-  --comida: #f29a2e;
-  --corpo: #7859f8;
-  --erro: #d92d20;
+  --card-2: #eef2f8;
+  --texto: #1e293b;
+  --texto-suave: #64748b;
+  --linha: rgb(148 163 184 / 0.24);
+  /* Marca: azul-violeta. (O nome --pulso ficou do primeiro nome do app.) */
+  --pulso: #6366f1;
+  --pulso-texto: #4f46e5;
+  --marca-grad: linear-gradient(135deg, #8b5cf6 0%, #6366f1 42%, #3b82f6 100%);
+  --ciano: #06b6d4;
+  --passos: #10b981;
+  --agua: #3b82f6;
+  --comida: #f59e0b;
+  --corpo: #8b5cf6;
+  --erro: #e11d48;
   --sombra: none;
-  --sombra-leve: 0 1px 2px rgb(20 21 26 / 0.06), 0 4px 12px -6px rgb(20 21 26 / 0.12);
-  --sombra-flutua: 0 2px 6px rgb(20 21 26 / 0.06), 0 16px 36px -14px rgb(20 21 26 / 0.28);
-  /* Vidro (Liquid Glass): superfícies translúcidas sobre um fundo com cor. */
-  --vidro: rgb(255 255 255 / 0.42);
-  --vidro-borda: rgb(255 255 255 / 0.75);
-  --vidro-card: linear-gradient(160deg, rgb(255 255 255 / 0.58), rgb(255 255 255 / 0.3));
-  --vidro-brilho: inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 0 0 1px rgb(255 255 255 / 0.55);
-  --vidro-sombra: 0 1px 2px rgb(20 21 26 / 0.04), 0 12px 32px -20px rgb(20 21 26 / 0.3);
-  --vidro-filtro: blur(26px) saturate(1.9);
-  --ambiente-forca: 1;
-  --raio: 24px;
+  --sombra-leve: 0 1px 2px rgb(30 41 59 / 0.05), 0 6px 16px -8px rgb(59 82 140 / 0.25);
+  --sombra-flutua: 0 2px 6px rgb(30 41 59 / 0.05), 0 20px 44px -18px rgb(59 82 140 / 0.4);
+  /* Vidro fosco: branco translúcido, borda clara iluminada, sombra azulada. */
+  --vidro: rgb(255 255 255 / 0.5);
+  --vidro-borda: rgb(255 255 255 / 0.85);
+  --vidro-card: linear-gradient(155deg, rgb(255 255 255 / 0.74), rgb(255 255 255 / 0.44));
+  --vidro-brilho: inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 0 0 1px rgb(255 255 255 / 0.6);
+  --vidro-sombra: 0 1px 2px rgb(30 41 59 / 0.04), 0 18px 40px -24px rgb(59 82 140 / 0.38);
+  --vidro-filtro: blur(24px) saturate(1.6);
+  /* Superfície dentro do vidro (mini-cartões, botões de água). */
+  --vidro-interno: linear-gradient(155deg, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.36));
+  --vidro-interno-borda: inset 0 0 0 1px rgb(255 255 255 / 0.85), 0 6px 16px -12px rgb(59 82 140 / 0.35);
+  /* Luz ambiente do fundo. */
+  --amb-1: #bfdbfe;
+  --amb-2: #ddd6fe;
+  --amb-3: #c7d2fe;
+  --amb-4: #cffafe;
+  --amb-5: #ffffff;
+  --selo-luz: #ffffff;
+  --raio: 26px;
   --margem: 18px;
-  --display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --display: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: light;
-  font-family: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-feature-settings: "cv11", "ss01";
   -webkit-tap-highlight-color: transparent;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-tema="claro"]) {
-    --fundo: #06070c;
-    --card: #141519;
-    --card-2: #1f2026;
-    --texto: #f5f5f7;
-    --texto-suave: #9b9ea9;
-    --linha: #26272d;
-    --pulso: #ff6a60;
-    --pulso-texto: #ff8077;
-    --passos: #34c88a;
-    --agua: #4e95ff;
-    --comida: #ffb04d;
-    --corpo: #9a85ff;
-    --erro: #ff6b5e;
+    --fundo: #0b1020;
+    --card: #151b2e;
+    --card-2: #1c2338;
+    --texto: #e8edf7;
+    --texto-suave: #94a3b8;
+    --linha: rgb(148 163 184 / 0.16);
+    --pulso: #818cf8;
+    --pulso-texto: #a5b4fc;
+    --passos: #34d399;
+    --agua: #60a5fa;
+    --comida: #fbbf24;
+    --corpo: #a78bfa;
+    --erro: #fb7185;
     --sombra-leve: none;
-    --sombra-flutua: 0 16px 36px -14px rgb(0 0 0 / 0.8);
-    --vidro: rgb(44 45 54 / 0.5);
-    --vidro-borda: rgb(255 255 255 / 0.12);
-    --vidro-card: linear-gradient(180deg, rgb(255 255 255 / 0.085), rgb(255 255 255 / 0.05));
-    --vidro-brilho: inset 0 1px 0 rgb(255 255 255 / 0.14), inset 0 0 0 1px rgb(255 255 255 / 0.06);
-    --vidro-sombra: none;
-    --ambiente-forca: 0.85;
+    --sombra-flutua: 0 20px 44px -18px rgb(0 0 0 / 0.7);
+    --vidro: rgb(30 38 64 / 0.55);
+    --vidro-borda: rgb(165 180 252 / 0.2);
+    --vidro-card: linear-gradient(155deg, rgb(148 163 255 / 0.13), rgb(148 163 255 / 0.04));
+    --vidro-brilho: inset 0 1px 0 rgb(255 255 255 / 0.1), inset 0 0 0 1px rgb(165 180 252 / 0.16);
+    --vidro-sombra: 0 18px 40px -24px rgb(0 0 0 / 0.7);
+    --vidro-interno: linear-gradient(155deg, rgb(148 163 255 / 0.1), rgb(148 163 255 / 0.03));
+    --vidro-interno-borda: inset 0 0 0 1px rgb(165 180 252 / 0.16);
+    --amb-1: rgb(59 130 246 / 0.45);
+    --amb-2: rgb(139 92 246 / 0.4);
+    --amb-3: rgb(99 102 241 / 0.35);
+    --amb-4: rgb(6 182 212 / 0.18);
+    --amb-5: rgb(11 16 32 / 0);
+    --selo-luz: rgb(255 255 255 / 0.06);
     color-scheme: dark;
   }
 }
 :root[data-tema="escuro"] {
-  --fundo: #06070c;
-  --card: #141519;
-  --card-2: #1f2026;
-  --texto: #f5f5f7;
-  --texto-suave: #9b9ea9;
-  --linha: #26272d;
-  --pulso: #ff6a60;
-  --pulso-texto: #ff8077;
-  --passos: #34c88a;
-  --agua: #4e95ff;
-  --comida: #ffb04d;
-  --corpo: #9a85ff;
-  --erro: #ff6b5e;
+  --fundo: #0b1020;
+  --card: #151b2e;
+  --card-2: #1c2338;
+  --texto: #e8edf7;
+  --texto-suave: #94a3b8;
+  --linha: rgb(148 163 184 / 0.16);
+  --pulso: #818cf8;
+  --pulso-texto: #a5b4fc;
+  --passos: #34d399;
+  --agua: #60a5fa;
+  --comida: #fbbf24;
+  --corpo: #a78bfa;
+  --erro: #fb7185;
   --sombra-leve: none;
-  --sombra-flutua: 0 16px 36px -14px rgb(0 0 0 / 0.8);
-  --vidro: rgb(44 45 54 / 0.5);
-  --vidro-borda: rgb(255 255 255 / 0.12);
-  --vidro-card: linear-gradient(180deg, rgb(255 255 255 / 0.085), rgb(255 255 255 / 0.05));
-  --vidro-brilho: inset 0 1px 0 rgb(255 255 255 / 0.14), inset 0 0 0 1px rgb(255 255 255 / 0.06);
-  --vidro-sombra: none;
-  --ambiente-forca: 0.85;
+  --sombra-flutua: 0 20px 44px -18px rgb(0 0 0 / 0.7);
+  --vidro: rgb(30 38 64 / 0.55);
+  --vidro-borda: rgb(165 180 252 / 0.2);
+  --vidro-card: linear-gradient(155deg, rgb(148 163 255 / 0.13), rgb(148 163 255 / 0.04));
+  --vidro-brilho: inset 0 1px 0 rgb(255 255 255 / 0.1), inset 0 0 0 1px rgb(165 180 252 / 0.16);
+  --vidro-sombra: 0 18px 40px -24px rgb(0 0 0 / 0.7);
+  --vidro-interno: linear-gradient(155deg, rgb(148 163 255 / 0.1), rgb(148 163 255 / 0.03));
+  --vidro-interno-borda: inset 0 0 0 1px rgb(165 180 252 / 0.16);
+  --amb-1: rgb(59 130 246 / 0.45);
+  --amb-2: rgb(139 92 246 / 0.4);
+  --amb-3: rgb(99 102 241 / 0.35);
+  --amb-4: rgb(6 182 212 / 0.18);
+  --amb-5: rgb(11 16 32 / 0);
+  --selo-luz: rgb(255 255 255 / 0.06);
   color-scheme: dark;
 }
 
@@ -117,19 +144,18 @@ body::after {
   pointer-events: none;
 }
 body::before {
-  opacity: var(--ambiente-forca);
   background:
-    radial-gradient(60% 34% at 85% 6%, color-mix(in srgb, var(--pulso) 62%, transparent), transparent 72%),
-    radial-gradient(58% 36% at 8% 26%, color-mix(in srgb, var(--agua) 52%, transparent), transparent 72%),
-    radial-gradient(60% 36% at 92% 56%, color-mix(in srgb, var(--corpo) 48%, transparent), transparent 72%),
-    radial-gradient(62% 36% at 6% 84%, color-mix(in srgb, var(--passos) 40%, transparent), transparent 72%),
-    radial-gradient(46% 28% at 55% 42%, color-mix(in srgb, var(--comida) 30%, transparent), transparent 72%);
-  filter: blur(24px);
+    radial-gradient(60% 40% at 12% 2%, var(--amb-1), transparent 70%),
+    radial-gradient(55% 36% at 96% 14%, var(--amb-2), transparent 70%),
+    radial-gradient(60% 40% at 86% 70%, var(--amb-3), transparent 70%),
+    radial-gradient(50% 34% at 4% 78%, var(--amb-4), transparent 70%),
+    radial-gradient(46% 30% at 50% 40%, var(--amb-5), transparent 70%);
+  filter: blur(20px);
   animation: flutuar 40s ease-in-out infinite alternate;
 }
 /* Um véu claro por cima das cores, para o texto nunca brigar com o fundo. */
 body::after {
-  background: color-mix(in srgb, var(--fundo) 12%, transparent);
+  display: none;
 }
 @keyframes flutuar {
   0% { transform: translate3d(0, 0, 0) scale(1); }
@@ -171,26 +197,26 @@ a {
 }
 .num-grande {
   font-family: var(--display);
-  font-size: 48px;
+  font-size: 46px;
   line-height: 50px;
-  font-weight: 700;
-  letter-spacing: -0.035em;
+  font-weight: 800;
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
 }
 .num-medio {
   font-family: var(--display);
-  font-size: 30px;
+  font-size: 28px;
   line-height: 34px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
 .titulo {
   font-family: var(--display);
   font-size: 30px;
-  line-height: 34px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  line-height: 36px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
   margin: 0;
 }
 .subtitulo {
@@ -210,10 +236,10 @@ a {
 }
 .rotulo-secao {
   font-family: var(--display);
-  font-size: 20px;
+  font-size: 19px;
   line-height: 26px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   color: var(--texto);
   margin: 30px 2px 12px;
 }
@@ -269,17 +295,48 @@ a {
 }
 .topo-hoje {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
-  margin: 6px 2px 18px;
+  gap: 12px;
+  margin: 10px 4px 22px;
 }
-.topo-hoje .titulo {
-  font-size: 34px;
-  line-height: 38px;
+.data-hoje {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--texto-suave);
+}
+.data-hoje svg {
+  color: var(--pulso);
+  opacity: 0.8;
+}
+.saudacao {
+  margin: 0;
+  font-size: 40px;
+  line-height: 44px;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+.nome-grad {
+  background: var(--marca-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding-right: 2px;
+}
+.frase-dia {
+  margin: 10px 0 0;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--texto-suave);
 }
 .avatar {
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
+  font-size: 19px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -341,9 +398,9 @@ a {
   margin-bottom: 12px;
 }
 .selo-icone {
-  width: 34px;
-  height: 34px;
-  border-radius: 11px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -354,8 +411,21 @@ a {
 .cor-corpo { --cor: var(--corpo); }
 .cor-pulso { --cor: var(--pulso); }
 .selo-icone {
-  background: color-mix(in srgb, var(--cor, var(--pulso)) 14%, transparent);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--cor, var(--pulso)) 10%, var(--selo-luz)), color-mix(in srgb, var(--cor, var(--pulso)) 22%, transparent));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.7), 0 6px 14px -8px color-mix(in srgb, var(--cor, var(--pulso)) 70%, transparent);
   color: var(--cor, var(--pulso));
+}
+.selo-icone.cheio {
+  background: linear-gradient(150deg, color-mix(in srgb, var(--cor, var(--pulso)) 70%, #fff), var(--cor, var(--pulso)));
+  color: #fff;
+}
+.lembrete {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 450;
+}
+.lembrete b {
+  font-weight: 700;
 }
 .texto-cor {
   color: var(--cor);
@@ -426,22 +496,21 @@ a {
   padding: 0 22px;
   border-radius: 999px;
   border: none;
-  font-weight: 700;
+  font-weight: 650;
   font-size: 16px;
-  background: var(--texto);
-  color: var(--card);
-  transition: transform 0.12s ease, opacity 0.2s;
+  background: var(--marca-grad);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35), 0 12px 26px -14px rgb(99 102 241 / 0.9);
+  transition: transform 0.12s ease, opacity 0.2s, box-shadow 0.2s;
   text-decoration: none;
   white-space: nowrap;
 }
 .botao:active {
   transform: scale(0.97);
 }
-.botao.marca,
-.botao.cor,
-.mais {
+.botao.cor {
   background-image: linear-gradient(180deg, rgb(255 255 255 / 0.22), rgb(255 255 255 / 0) 55%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45), 0 8px 20px -10px color-mix(in srgb, var(--cor, var(--pulso)) 90%, transparent);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45), 0 10px 22px -12px color-mix(in srgb, var(--cor) 90%, transparent);
 }
 .botao:disabled {
   opacity: 0.5;
@@ -450,10 +519,6 @@ a {
 .botao.cheio {
   width: 100%;
   min-height: 54px;
-}
-.botao.marca {
-  background: var(--pulso);
-  color: #fff;
 }
 .botao.secundario {
   color: var(--texto);
@@ -468,14 +533,17 @@ a {
 .botao.contorno {
   border: none;
   color: var(--texto);
+  font-weight: 600;
 }
 .botao.texto {
   background: transparent;
+  box-shadow: none;
   color: var(--pulso-texto);
   padding: 0 12px;
 }
 .botao.perigo {
   background: transparent;
+  box-shadow: none;
   color: var(--erro);
   border: 1.5px solid color-mix(in srgb, var(--erro) 35%, transparent);
 }
@@ -490,7 +558,7 @@ a {
 }
 .cor-comida .botao.cor,
 .botao.cor.cor-comida {
-  color: #2a1c05;
+  color: #3b2502;
 }
 .botao-icone {
   width: 44px;
@@ -514,15 +582,16 @@ a {
   gap: 10px;
 }
 .botao-agua {
-  min-height: 64px;
-  border-radius: 18px;
+  min-height: 68px;
+  border-radius: 20px;
   border: none;
-  background: color-mix(in srgb, var(--agua) 10%, var(--card));
+  background: var(--vidro-interno), color-mix(in srgb, var(--agua) 8%, transparent);
+  box-shadow: var(--vidro-interno-borda);
   color: var(--agua);
   font-family: var(--display);
-  font-weight: 700;
-  font-size: 20px;
-  letter-spacing: -0.02em;
+  font-weight: 750;
+  font-size: 21px;
+  letter-spacing: -0.03em;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -531,7 +600,7 @@ a {
   transition: transform 0.12s ease;
 }
 .botao-agua small {
-  font-family: "Figtree", system-ui, sans-serif;
+  font-family: inherit;
   letter-spacing: 0;
   font-size: 11px;
   font-weight: 600;
@@ -579,24 +648,38 @@ a {
   border-radius: 24px;
   transition: color 0.2s, background 0.2s;
 }
+.aba {
+  position: relative;
+}
 .aba.ativa {
-  color: var(--texto);
-  background: color-mix(in srgb, var(--card) 70%, transparent);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.6), 0 2px 8px -4px rgb(20 21 26 / 0.18);
+  color: var(--pulso-texto);
+  background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--pulso) 16%, transparent), color-mix(in srgb, var(--pulso) 6%, transparent));
+}
+.aba.ativa::after {
+  content: "";
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 22px;
+  height: 3px;
+  margin-left: -11px;
+  border-radius: 2px;
+  background: var(--marca-grad);
 }
 .aba.ativa svg {
   color: var(--pulso);
 }
 .mais {
   justify-self: center;
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   border: none;
-  background: var(--pulso);
+  background: var(--marca-grad);
   color: #fff;
   display: grid;
   place-items: center;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--pulso) 12%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.4), 0 12px 24px -8px rgb(99 102 241 / 0.75);
   transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .mais.aberto {
@@ -672,7 +755,7 @@ a {
   margin-bottom: 18px;
 }
 .card .segmentos {
-  background: color-mix(in srgb, var(--texto) 6%, transparent);
+  background: color-mix(in srgb, var(--pulso) 7%, transparent);
   box-shadow: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
@@ -686,9 +769,9 @@ a {
   color: var(--texto-suave);
 }
 .segmento.ativo {
-  background: var(--card);
-  color: var(--texto);
-  box-shadow: var(--sombra-leve);
+  background: var(--marca-grad);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 6px 14px -8px rgb(99 102 241 / 0.8);
 }
 
 /* ---------- Listas ---------- */
@@ -896,7 +979,8 @@ textarea.entrada {
   display: grid;
   place-items: center;
   color: #fff;
-  background: var(--pulso);
+  background: var(--marca-grad);
+  box-shadow: 0 14px 30px -12px rgb(99 102 241 / 0.8);
   position: relative;
   overflow: hidden;
 }
@@ -918,7 +1002,7 @@ textarea.entrada {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: var(--pulso);
+  background: var(--marca-grad);
   color: #fff;
   display: grid;
   place-items: center;
@@ -990,10 +1074,10 @@ textarea.entrada {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: color-mix(in srgb, var(--texto) 80%, transparent);
+  background: rgb(30 41 59 / 0.82);
   -webkit-backdrop-filter: blur(20px) saturate(1.6);
   backdrop-filter: blur(20px) saturate(1.6);
-  color: var(--fundo);
+  color: #f8fafc;
   border-radius: 20px;
   padding: 12px 14px 12px 18px;
   font-weight: 600;
@@ -1003,7 +1087,7 @@ textarea.entrada {
 .aviso button {
   background: none;
   border: none;
-  color: color-mix(in srgb, var(--pulso) 80%, var(--card));
+  color: #a5b4fc;
   font-weight: 800;
   padding: 6px 4px;
 }
@@ -1029,18 +1113,19 @@ textarea.entrada {
   margin: auto 0;
 }
 .boas-vindas-tela .marca {
-  margin: 0;
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
+  margin: 0 0 22px;
+  width: 76px;
+  height: 76px;
+  border-radius: 24px;
 }
 .boas-vindas-nome {
   font-family: var(--display);
-  font-size: 84px;
-  line-height: 80px;
-  font-weight: 700;
-  letter-spacing: -0.055em;
+  font-size: 88px;
+  line-height: 84px;
+  font-weight: 800;
+  letter-spacing: -0.065em;
   margin: 0 0 0 -4px;
+  color: var(--texto);
 }
 .boas-vindas-linha {
   display: block;
@@ -1074,15 +1159,17 @@ textarea.entrada {
   width: 84px;
   height: 84px;
   border-radius: 26px;
-  background: var(--pulso);
+  background: var(--vidro-card);
+  -webkit-backdrop-filter: var(--vidro-filtro);
+  backdrop-filter: var(--vidro-filtro);
   display: grid;
   place-items: center;
   margin: 0 auto 22px;
-  box-shadow: 0 16px 40px -14px color-mix(in srgb, var(--pulso) 80%, transparent);
+  box-shadow: var(--vidro-brilho), 0 18px 40px -16px rgb(99 102 241 / 0.5);
 }
 .botao-google {
-  background: var(--texto);
-  color: var(--card);
+  background: var(--marca-grad);
+  color: #fff;
   border: none;
 }
 .botao-google .google-g {
@@ -1098,23 +1185,37 @@ textarea.entrada {
   height: 16px;
 }
 
-/* ---------- Hoje: o pulso do dia ---------- */
+/* ---------- Hoje: seu ritmo ---------- */
 .hero-dia {
-  padding: 16px 16px 16px;
+  padding: 18px 16px 16px;
 }
 .hero-cabeca {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  font-family: var(--display);
-  font-size: 17px;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  margin: 0 2px 2px;
+  margin: 0 2px 16px;
 }
-.hero-cabeca .legenda {
-  font-family: "Figtree", system-ui, sans-serif;
-  letter-spacing: 0;
+.selo-marca {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: #fff;
+  background: var(--marca-grad);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4), 0 10px 20px -10px rgb(99 102 241 / 0.9);
+}
+.vidro-pilula {
+  background: var(--vidro-interno);
+  box-shadow: var(--vidro-interno-borda);
+  color: var(--texto-suave);
+  font-weight: 600;
+  padding: 7px 12px;
+  font-size: 13px;
 }
 .pulso-dia {
   display: block;
@@ -1122,69 +1223,80 @@ textarea.entrada {
   height: auto;
   overflow: visible;
 }
+.pd-trilha {
+  stroke: color-mix(in srgb, var(--pulso) 16%, transparent);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
 .pd-passado {
   fill: none;
-  stroke: var(--texto);
-  stroke-width: 2.2;
+  stroke-width: 5;
   stroke-linejoin: round;
   stroke-linecap: round;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  animation: desenhar 1.4s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-}
-.pd-futuro {
-  fill: none;
-  stroke: color-mix(in srgb, var(--texto) 18%, transparent);
-  stroke-width: 2;
-  stroke-dasharray: 0.1 5;
-  stroke-linecap: round;
+  animation: desenhar 1.2s cubic-bezier(0.65, 0, 0.35, 1) forwards;
 }
 .pd-ponto {
-  stroke: var(--card);
+  stroke: #fff;
   stroke-width: 2;
 }
 .pd-agora {
-  fill: var(--pulso);
-  stroke: var(--card);
-  stroke-width: 2.5;
+  fill: #fff;
+  stroke: var(--pulso);
+  stroke-width: 3.5;
 }
 .pd-agora-halo {
   fill: var(--pulso);
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: halo 2.4s ease-out infinite;
+  opacity: 0.18;
 }
 .pd-hora {
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   fill: var(--texto-suave);
   font-family: inherit;
 }
 .metricas-dia {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-top: 10px;
-  padding-top: 14px;
-  border-top: 1px solid var(--linha);
+  gap: 10px;
+  margin-top: 14px;
 }
 .metrica {
   display: grid;
-  gap: 4px;
+  gap: 6px;
   text-align: left;
-  background: none;
   border: none;
-  padding: 0;
+  padding: 13px 10px 12px 11px;
+  border-radius: 20px;
+  background: var(--vidro-interno);
+  box-shadow: var(--vidro-interno-borda);
   color: inherit;
   min-width: 0;
+  transition: transform 0.15s ease;
+}
+.metrica:active {
+  transform: scale(0.97);
 }
 .metrica-nome {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 12.5px;
+  white-space: nowrap;
   font-weight: 600;
-  color: var(--texto-suave);
+  color: var(--texto);
+  margin-bottom: 4px;
+}
+.metrica-icone {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--cor);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--cor) 12%, var(--selo-luz)), color-mix(in srgb, var(--cor) 26%, transparent));
 }
 .ponto {
   width: 7px;
@@ -1195,25 +1307,24 @@ textarea.entrada {
 }
 .metrica-valor {
   font-family: var(--display);
-  font-size: 25px;
+  font-size: 26px;
   line-height: 30px;
-  font-weight: 700;
-  letter-spacing: -0.035em;
+  font-weight: 800;
+  letter-spacing: -0.04em;
   white-space: nowrap;
 }
 .metrica-barra {
-  height: 4px;
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--cor) 16%, transparent);
+  height: 5px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--cor) 18%, transparent);
   overflow: hidden;
-  margin-top: 2px;
 }
 .metrica-barra span {
   display: block;
   height: 100%;
-  border-radius: 2px;
-  background: var(--cor);
-  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: 3px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--cor) 65%, #fff), var(--cor));
+  transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .metrica-meta {
   font-size: 12px;
@@ -1243,7 +1354,7 @@ textarea.entrada {
   font-variant-numeric: tabular-nums;
 }
 .balanca-valor small {
-  font-family: "Figtree", system-ui, sans-serif;
+  font-family: inherit;
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0;

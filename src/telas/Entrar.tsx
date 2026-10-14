@@ -36,10 +36,10 @@ export default function Entrar() {
   return (
     <div className="boas-vindas-tela">
       <div className="marca">
-        <Marca tamanho={30} />
+        <Marca tamanho={46} />
       </div>
       <div className="boas-vindas-meio">
-        <h1 className="boas-vindas-nome">Ritmo</h1>
+        <h1 className="boas-vindas-nome">ritmo</h1>
         <svg className="boas-vindas-linha" viewBox="0 0 400 92" preserveAspectRatio="none" aria-hidden="true">
           <path
             pathLength={1}
@@ -48,7 +48,9 @@ export default function Entrar() {
           />
         </svg>
         <p className="boas-vindas-frase">
-          <b>Seu corpo, no seu ritmo.</b> Passos, corridas, comida e água num lugar só.
+          <b>Beba água. Cuide do seu ritmo.</b>
+          <br />
+          Passos, comida, água e corpo num lugar só.
         </p>
       </div>
       <div>
