@@ -2,8 +2,8 @@
 // Dados iniciais da Paloma
 // ==============================================
 // O plano da nutricionista (01/10/2026), a meta de 1.500 kcal e a
-// bioimpedância da balança. Entram sozinhos no primeiro acesso (modo pessoal
-// no Claude, ou boas-vindas no app publicado), para não precisar digitar.
+// bioimpedância da balança. Entram sozinhos no primeiro acesso, nas
+// boas-vindas, para não precisar digitar.
 // Quando o app abrir para outras pessoas, isto sai.
 
 import type { Medida, Plano } from "./tipos";

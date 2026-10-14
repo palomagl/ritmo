@@ -6,19 +6,16 @@
 
 import type { Backend } from "./tipos";
 import { criarDemo } from "./demo";
-import { criarPessoal } from "./pessoal";
 import { criarFirestore } from "./firestore";
 
 export const MODO_DEMO = import.meta.env.MODE === "demo";
-/** Versão publicada no Claude: dados da pessoa, guardados na conta dela. */
-export const MODO_PESSOAL = import.meta.env.MODE === "pessoal";
+
 
 /** Se a configuração do Firebase estiver faltando, o motivo fica aqui (e o app mostra na tela). */
 export let ERRO_CONFIG: string | null = null;
 
 function criar(): Backend {
   if (MODO_DEMO) return criarDemo();
-  if (MODO_PESSOAL) return criarPessoal();
   try {
     return criarFirestore();
   } catch (e) {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { dados, MODO_DEMO, MODO_PESSOAL } from "@/dados";
+import { dados, MODO_DEMO } from "@/dados";
 import { GoogleG, Marca } from "@/componentes/Icone";
 
 const MENSAGENS: Record<string, string> = {
@@ -58,7 +58,7 @@ export default function Entrar() {
         <p className="so-largo legenda" style={{ margin: "0 0 22px" }}>Com sua conta Google, seus registros ficam salvos e sincronizados no celular e no computador.</p>
         <button className="botao botao-google cheio" onClick={entrar} disabled={entrando}>
           <span className="google-g"><GoogleG /></span>
-          {entrando ? "Entrando…" : MODO_DEMO ? "Entrar (demonstração)" : MODO_PESSOAL ? "Entrar" : "Entrar com Google"}
+          {entrando ? "Entrando…" : MODO_DEMO ? "Entrar (demonstração)" : "Entrar com Google"}
         </button>
         {erro && (
           <p className="legenda" role="alert" style={{ color: "var(--erro)", marginTop: 16, textAlign: "center" }}>
