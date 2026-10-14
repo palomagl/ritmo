@@ -268,11 +268,8 @@ function GuiaAtalho({ aberto, aoFechar }: { aberto: boolean; aoFechar: () => voi
     }
   };
 
-  const urlToken = d ? `https://securetoken.googleapis.com/v1/token?key=${d.chave}` : "";
-  const urlGravar = d
-    ? `https://firestore.googleapis.com/v1/projects/${d.projeto}/databases/(default)/documents/users/${d.uid}/pulsoDias/DATA?updateMask.fieldPaths=passos&updateMask.fieldPaths=passosSyncEm`
-    : "";
-  const corpo = `{"fields":{"passos":{"integerValue":"PASSOS"},"passosSyncEm":{"timestampValue":"AGORA"}}}`;
+  // O app recebe os passos em /api/passos: o Atalho só soma e manda.
+  const urlEnviar = `${window.location.origin}/api/passos`;
 
   const Copiavel = ({ rotulo, valor, oculto }: { rotulo: string; valor: string; oculto?: boolean }) => (
     <div className="campo">
@@ -295,29 +292,26 @@ function GuiaAtalho({ aberto, aoFechar }: { aberto: boolean; aoFechar: () => voi
       ) : (
         <div className="pilha">
           <p className="suave" style={{ margin: 0 }}>
-            O navegador não lê o app Saúde, mas o app <b>Atalhos</b> lê. Crie um atalho chamado <b>Enviar passos pro Ritmo</b> com estas ações, nesta ordem:
+            O navegador não lê o app Saúde, mas o app <b>Atalhos</b> lê. Crie um atalho chamado <b>Passos pro Ritmo</b> com só 3 ações:
           </p>
           <ol style={{ paddingLeft: 20, margin: 0, display: "grid", gap: 8 }}>
-            <li><b>Localizar Amostras de Saúde</b>: tipo Passos, Data de Início é Hoje. Se usa Apple Watch, filtre a Fonte para só o relógio (senão soma em dobro).</li>
-            <li><b>Calcular Estatísticas</b>: Soma. Depois <b>Arredondar Número</b>.</li>
-            <li><b>Obter Conteúdo do URL</b>: a URL do token abaixo, método POST, Corpo da Requisição: Formulário, com <code>grant_type</code> = <code>refresh_token</code> e <code>refresh_token</code> = o seu token.</li>
-            <li><b>Obter Valor do Dicionário</b>: chave <code>id_token</code>.</li>
-            <li><b>Formatar Data</b>: Data Atual, formato personalizado <code>yyyy-MM-dd</code>.</li>
-            <li><b>Obter Conteúdo do URL</b>: a URL de gravação abaixo, trocando <code>DATA</code> pela Data Formatada. Método PATCH, cabeçalho <code>Authorization</code> = <code>Bearer</code> + espaço + o id_token, corpo JSON como o modelo (PASSOS = a soma arredondada; AGORA = Data Atual em ISO 8601).</li>
-            <li>Em <b>Automação</b> → Hora do Dia, crie uma para 12:00, 18:00, 21:00 e 23:50, todas com <b>Executar Imediatamente</b>.</li>
+            <li><b>Localizar Amostras de Saúde</b>: tipo <b>Passos</b>, Data de Início é <b>Hoje</b>. Se usa Apple Watch, adicione o filtro Fonte é o seu iPhone (senão conta em dobro).</li>
+            <li><b>Calcular Estatísticas</b>: <b>Soma</b>.</li>
+            <li><b>Obter Conteúdo do URL</b>: cole o endereço abaixo, método <b>POST</b>, Corpo da Requisição <b>JSON</b> com dois campos: <code>passos</code> (Número) = Estatísticas, e <code>token</code> (Texto) = o seu token.</li>
           </ol>
-          <Copiavel rotulo="URL do token" valor={urlToken} />
+          <p className="suave" style={{ margin: 0 }}>
+            Toque em ▶️ para testar: os passos aparecem em Mover. Depois, em <b>Automação → Hora do Dia</b>, crie para 12:00, 18:00, 21:00 e 23:50, com <b>Executar Imediatamente</b>.
+          </p>
+          <Copiavel rotulo="Endereço (URL)" valor={urlEnviar} />
           <div className="campo">
-            <Copiavel rotulo="Seu token (refresh_token)" valor={d.token} oculto={!mostrarToken} />
+            <Copiavel rotulo="Seu token" valor={d.token} oculto={!mostrarToken} />
             <button className="botao texto pequeno" style={{ justifySelf: "start" }} onClick={() => setMostrarToken((x) => !x)}>
               {mostrarToken ? "Esconder token" : "Mostrar token"}
             </button>
           </div>
-          <Copiavel rotulo="URL de gravação" valor={urlGravar} />
-          <Copiavel rotulo="Modelo do corpo JSON" valor={corpo} />
           <div className="card cor-comida" style={{ padding: 14 }}>
             <p className="legenda" style={{ margin: 0, color: "var(--texto)" }}>
-              <b>Importante:</b> o token dá acesso aos seus dados; não compartilhe. O <code>updateMask</code> da URL faz o atalho mexer só nos passos: sem ele, a água e a comida do dia seriam apagadas.
+              <b>Importante:</b> o token dá acesso aos seus dados; não compartilhe. Se sair da conta e entrar de novo, copie o token novo para o Atalho.
             </p>
           </div>
         </div>

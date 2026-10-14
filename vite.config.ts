@@ -42,7 +42,7 @@ export default defineConfig({
         // /__/auth/ é o handler do login do Google (proxy no vercel.json). Sem
         // esta exceção o service worker devolve o index.html e o login por
         // redirect, que é o caminho do iPhone, nunca termina.
-        navigateFallbackDenylist: [/^\/__\/auth\//],
+        navigateFallbackDenylist: [/^\/api\//, /^\/__\/auth\//],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
