@@ -54,8 +54,8 @@ export default function Perfil() {
       <Topo titulo="Perfil" />
 
       <section className="card linha">
-        <span className="avatar" style={{ width: 56, height: 56, fontSize: 22 }}>
-          {perfil.foto || usuario?.foto ? <img src={(perfil.foto || usuario?.foto)!} alt="" referrerPolicy="no-referrer" /> : (perfil.nome || "P").slice(0, 1)}
+        <span className="avatar avatar-bolha" style={{ width: 60, height: 60, fontSize: 24, marginTop: 0 }}>
+          {(perfil.nome || usuario?.nome || "P").slice(0, 1).toUpperCase()}
         </span>
         <div className="cresce">
           <p className="subtitulo">{perfil.nome || usuario?.nome}</p>
