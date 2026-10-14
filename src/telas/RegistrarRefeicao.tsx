@@ -19,11 +19,17 @@ import { dec, mudarPorcao, NOMES_REFEICAO, ORDEM_REFEICOES, refeicaoDoPlano, ref
 
 type Etapa = "escolher" | "foto" | "analisando" | "revisar" | "erro";
 
+// Ceia fica de fora do menu: quem come à noite registra como jantar.
+const TIPOS_MENU = ORDEM_REFEICOES.filter((t) => t !== "ceia");
+
 export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) {
   const { perfil, dia, plano, hoje } = useEstado();
   const avisar = useAvisos();
   const agora = new Date();
-  const [tipo, setTipo] = useState<TipoRefeicao>(refeicaoPelaHora(agora.getHours() * 60 + agora.getMinutes()));
+  const [tipo, setTipo] = useState<TipoRefeicao>(() => {
+    const t = refeicaoPelaHora(agora.getHours() * 60 + agora.getMinutes());
+    return t === "ceia" ? "jantar" : t;
+  });
   const [etapa, setEtapa] = useState<Etapa>("escolher");
   const [foto, setFoto] = useState<{ base64: string; miniatura: string; pendenteId?: string } | null>(null);
   const [texto, setTexto] = useState("");
@@ -130,7 +136,7 @@ export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) 
       <Topo titulo={modo === "foto" ? "Foto do prato" : "Descrever refeição"} voltarPara="/comer" />
 
       <div className="linha" style={{ overflowX: "auto", gap: 8, paddingBottom: 4, marginBottom: 14, scrollbarWidth: "none" }}>
-        {ORDEM_REFEICOES.map((t) => (
+        {TIPOS_MENU.map((t) => (
           <button key={t} className={`botao pequeno ${t === tipo ? "cor cor-comida" : "secundario"}`} onClick={() => setTipo(t)} aria-pressed={t === tipo}>
             {NOMES_REFEICAO[t]}
           </button>
