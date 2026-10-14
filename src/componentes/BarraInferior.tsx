@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Icone, type NomeIcone } from "./Icone";
+import { Icone, Marca, type NomeIcone } from "./Icone";
 import { Folha } from "./basicos";
 import { Link, navegar, useCaminho } from "@/app/rota";
 import { useRegistrarAgua } from "@/app/acoes";
@@ -39,14 +39,23 @@ export function BarraInferior() {
   return (
     <>
       <nav className="barra" aria-label="Navegação principal">
+        <div className="barra-marca" aria-hidden="true">
+          <Marca tamanho={34} />
+          <span>ritmo</span>
+        </div>
         <div className="barra-dentro">
           {aba(0)}
           {aba(1)}
           <button className={`mais${aberto ? " aberto" : ""}`} onClick={() => setAberto((a) => !a)} aria-label="Ações rápidas" aria-expanded={aberto}>
             <Icone nome="mais" tamanho={26} strokeWidth={2.6} />
+            <span className="mais-rotulo">Registrar</span>
           </button>
           {aba(2)}
           {aba(3)}
+          <Link para="/perfil" className={`aba so-largo${caminho.startsWith("/perfil") ? " ativa" : ""}`} aria-current={caminho.startsWith("/perfil") ? "page" : undefined}>
+            <Icone nome="engrenagem" />
+            Perfil
+          </Link>
         </div>
       </nav>
 

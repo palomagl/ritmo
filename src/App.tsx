@@ -94,7 +94,7 @@ function Conteudo() {
 
   return (
     <>
-      <main className="app">
+      <main className={`app${caminho === "/" ? " app-hoje" : ""}`}>
         {MODO_DEMO && caminho === "/" && (
           <div className="pilula atencao" style={{ marginBottom: 10 }}>
             Modo demonstração: dados de exemplo

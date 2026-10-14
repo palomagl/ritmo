@@ -53,7 +53,9 @@ export default function Entrar() {
           Passos, comida, água e corpo num lugar só.
         </p>
       </div>
-      <div>
+      <div className="boas-vindas-acao">
+        <p className="so-largo boas-vindas-acao-titulo">Entre para começar</p>
+        <p className="so-largo legenda" style={{ margin: "0 0 22px" }}>Com sua conta Google, seus registros ficam salvos e sincronizados no celular e no computador.</p>
         <button className="botao botao-google cheio" onClick={entrar} disabled={entrando}>
           <span className="google-g"><GoogleG /></span>
           {entrando ? "Entrando…" : MODO_DEMO ? "Entrar (demonstração)" : MODO_PESSOAL ? "Entrar" : "Entrar com Google"}

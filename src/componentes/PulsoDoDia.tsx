@@ -46,9 +46,10 @@ export function PulsoDoDia({ eventos, acordaH, dormeH, agoraH }: { eventos: Even
   const hora = (h: number) => `${Math.round(h) % 24}h`;
   const uid = useId().replace(/:/g, "");
   const Y = 16; // centro da barra
-  const ALT = 44;
+  const ALT = 30;
 
   return (
+    <div className="pulso-dia-caixa">
     <svg className="pulso-dia" viewBox={`0 0 ${L} ${ALT}`} role="img" aria-label={`Seu dia até agora: ${picos.length} registros`}>
       <defs>
         <linearGradient id={`g${uid}`} x1={MARGEM} y1="0" x2={L - MARGEM} y2="0" gradientUnits="userSpaceOnUse">
@@ -67,9 +68,12 @@ export function PulsoDoDia({ eventos, acordaH, dormeH, agoraH }: { eventos: Even
       ))}
       <circle cx={xAgora} cy={Y} r={10} className="pd-agora" filter={`url(#s${uid})`} />
       <circle cx={xAgora} cy={Y} r={5} fill={`url(#g${uid})`} />
-      <text x={MARGEM} y={ALT - 2} className="pd-hora">{hora(acordaH)}</text>
-      <text x={L / 2} y={ALT - 2} className="pd-hora" textAnchor="middle">{`${meio}h`}</text>
-      <text x={L - MARGEM} y={ALT - 2} className="pd-hora" textAnchor="end">{hora(fim)}</text>
     </svg>
+    <div className="pd-horas" aria-hidden="true">
+      <span>{hora(acordaH)}</span>
+      <span>{`${meio}h`}</span>
+      <span>{hora(fim)}</span>
+    </div>
+    </div>
   );
 }

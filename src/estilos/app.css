@@ -1324,6 +1324,14 @@ textarea.entrada {
   stroke: rgb(255 255 255 / 0.9);
   stroke-width: 1;
 }
+.pd-horas {
+  display: flex;
+  justify-content: space-between;
+  margin: 2px 2.2% 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--texto-suave);
+}
 .pd-hora {
   font-size: 12px;
   font-weight: 500;
@@ -1559,4 +1567,299 @@ textarea.entrada {
   .ao-vivo {
     min-height: 100dvh;
   }
+}
+
+/* ==============================================
+   Telas grandes
+   ==============================================
+   Notebook (a partir de 1024 px): a barra de baixo vira uma lateral de
+   vidro e o Hoje vira um painel em duas colunas. PC (a partir de 1440 px):
+   três colunas e mais respiro. No celular nada disso aparece. */
+
+.so-largo,
+.barra-marca,
+.mais-rotulo {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --lateral: 248px;
+  }
+  .so-largo {
+    display: revert;
+  }
+
+  /* ---- Lateral ---- */
+  .barra {
+    left: 20px;
+    top: 20px;
+    bottom: 20px;
+    transform: none;
+    width: var(--lateral);
+    max-width: none;
+    padding: 22px 14px;
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .barra-marca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 8px;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.06em;
+    color: var(--texto);
+  }
+  .barra-dentro {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    flex: 1;
+  }
+  .barra-dentro .mais {
+    order: -1;
+    justify-self: auto;
+    width: 100%;
+    height: 52px;
+    border-radius: 18px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    font-size: 16px;
+    font-weight: 650;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4), 0 14px 28px -12px rgb(99 102 241 / 0.8);
+  }
+  .barra-dentro .mais.aberto {
+    transform: none;
+  }
+  .barra-dentro .mais.aberto svg {
+    transform: rotate(45deg);
+  }
+  .barra-dentro .mais svg {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .mais-rotulo {
+    display: inline;
+  }
+  .barra .aba {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 14px;
+    min-height: 50px;
+    padding: 0 14px;
+    border-radius: 16px;
+    font-size: 15px;
+  }
+  .barra .aba:hover {
+    background: color-mix(in srgb, var(--pulso) 6%, transparent);
+  }
+  .barra .aba.ativa {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--pulso) 14%, transparent), color-mix(in srgb, var(--pulso) 4%, transparent));
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.5);
+  }
+  .barra .aba.ativa svg {
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .barra .aba.ativa::after {
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 3px;
+    height: auto;
+    margin: 0;
+  }
+  .barra .aba.so-largo {
+    display: flex;
+    margin-top: auto;
+  }
+
+  /* ---- Conteúdo ao lado da lateral ---- */
+  .app:not(.sem-barra) {
+    max-width: none;
+    padding: 36px 40px 48px calc(var(--lateral) + 64px);
+  }
+  .app:not(.sem-barra) > * {
+    max-width: 880px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .app-hoje > .hoje {
+    max-width: 1180px;
+  }
+  .app:not(.sem-barra) .grade-2 {
+    gap: 16px;
+  }
+
+  /* ---- Hoje em duas colunas ---- */
+  .hoje {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    grid-template-areas:
+      "topo topo"
+      "hero agua"
+      "hero balanca"
+      "lembrete proxima"
+      "corrida proxima";
+    gap: 20px 22px;
+    align-items: start;
+  }
+  .hoje > * {
+    margin: 0 !important;
+  }
+  .area-topo { grid-area: topo; margin-bottom: 8px !important; }
+  .area-hero { grid-area: hero; align-self: stretch; }
+  .area-lembrete { grid-area: lembrete; }
+  .area-agua { grid-area: agua; }
+  .area-balanca { grid-area: balanca; }
+  .area-proxima { grid-area: proxima; }
+  .area-corrida { grid-area: corrida; }
+  .hoje .rotulo-secao {
+    margin-top: 0;
+  }
+  .hoje .saudacao {
+    font-size: 54px;
+    line-height: 58px;
+  }
+  .hoje .saudacao br {
+    display: none;
+  }
+  .hoje .hero-dia {
+    padding: 26px 24px 24px;
+    display: flex;
+    flex-direction: column;
+  }
+  .hoje .hero-cabeca {
+    font-size: 21px;
+  }
+  .hoje .pulso-dia-caixa {
+    margin: 10px 0 6px;
+  }
+  .hoje .pd-horas {
+    font-size: 13px;
+  }
+  /* Gráficos não crescem junto com a tela: o texto continua do tamanho certo. */
+  .app .grafico {
+    max-height: 250px;
+    margin: 0 auto;
+  }
+  .hoje .metricas-dia {
+    gap: 14px;
+    margin-top: auto;
+    padding-top: 20px;
+  }
+  .hoje .metrica {
+    padding: 18px 16px 16px;
+  }
+  .hoje .metrica-valor {
+    font-size: 38px;
+    line-height: 42px;
+  }
+  .hoje .avatar-bolha {
+    width: 72px;
+    height: 72px;
+  }
+
+  /* ---- Folhas viram janelas no meio da tela ---- */
+  .folha {
+    top: 50%;
+    bottom: auto;
+    left: 50%;
+    right: auto;
+    width: min(540px, 92vw);
+    max-height: 86dvh;
+    border-radius: 30px;
+    padding: 22px 26px 26px;
+    transform: translate(-50%, -50%);
+    animation: surgir 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: inset 0 0 0 1.5px var(--vidro-borda), var(--sombra-flutua);
+  }
+  .folha-alca {
+    display: none;
+  }
+  .avisos {
+    left: calc(var(--lateral) + 40px);
+  }
+
+  /* ---- Entrar em duas colunas ---- */
+  .boas-vindas-tela {
+    max-width: 1120px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    grid-template-areas:
+      "marca ."
+      "meio acao";
+    align-content: center;
+    align-items: center;
+    column-gap: 72px;
+    padding: 48px;
+  }
+  .boas-vindas-tela .marca { grid-area: marca; }
+  .boas-vindas-meio { grid-area: meio; margin: 0; }
+  .boas-vindas-acao {
+    grid-area: acao;
+    padding: 36px 32px;
+    border-radius: 30px;
+    background: var(--vidro-card);
+    -webkit-backdrop-filter: var(--vidro-filtro);
+    backdrop-filter: var(--vidro-filtro);
+    box-shadow: var(--vidro-brilho), var(--vidro-sombra);
+  }
+  .boas-vindas-acao-titulo {
+    margin: 0 0 6px;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  .boas-vindas-nome {
+    font-size: 132px;
+    line-height: 120px;
+  }
+  .boas-vindas-frase {
+    font-size: 21px;
+    line-height: 31px;
+  }
+}
+
+@media (min-width: 1440px) {
+  :root {
+    --lateral: 264px;
+  }
+  .app:not(.sem-barra) {
+    padding: 44px 56px 56px calc(var(--lateral) + 80px);
+  }
+  .app:not(.sem-barra) > * {
+    max-width: 960px;
+  }
+  .app-hoje > .hoje {
+    max-width: 1440px;
+  }
+  .hoje {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "topo topo topo"
+      "hero agua agua"
+      "hero lembrete balanca"
+      "proxima proxima corrida";
+    gap: 24px;
+  }
+  .hoje .saudacao {
+    font-size: 60px;
+    line-height: 64px;
+  }
+}
+
+@keyframes surgir {
+  from { opacity: 0; transform: translate(-50%, -47%) scale(0.98); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }

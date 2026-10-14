@@ -69,8 +69,8 @@ export default function Hoje() {
   const iniciais = primeiroNome.slice(0, 1).toUpperCase() || "P";
 
   return (
-    <div>
-      <header className="topo-hoje">
+    <div className="hoje">
+      <header className="topo-hoje area-topo">
         <div>
           <p className="data-hoje">
             <span className="data-icone"><Icone nome="calendario" tamanho={16} /></span> {dataPorExtenso()}
@@ -79,7 +79,8 @@ export default function Hoje() {
             {saudacao()}
             {primeiroNome ? (
               <>
-                ,<br />
+                ,{" "}
+                <br />
                 <span className="nome-grad">{primeiroNome}</span>
               </>
             ) : null}
@@ -89,12 +90,12 @@ export default function Hoje() {
           </Link>
         </div>
         <Link para="/perfil" className="avatar avatar-bolha" aria-label="Perfil e configurações">
-          {perfil.foto || usuario?.foto ? <img src={(perfil.foto || usuario?.foto)!} alt="" referrerPolicy="no-referrer" /> : iniciais}
+          {iniciais}
           <i className="avatar-ponto" aria-hidden="true" />
         </Link>
       </header>
 
-      <section className="card hero-dia" aria-label="Resumo do dia">
+      <section className="card hero-dia area-hero" aria-label="Resumo do dia">
         <div className="hero-cabeca">
           <span className="selo-marca">
             <Icone nome="pulso" tamanho={24} strokeWidth={2.4} />
@@ -136,7 +137,7 @@ export default function Hoje() {
         </div>
       </section>
 
-      <Link para={insight.rota} className={`card card-toque cor-${insight.cor}`} style={{ marginTop: 12, display: "flex", gap: 12, alignItems: "center" }}>
+      <Link para={insight.rota} className={`card card-toque cor-${insight.cor} area-lembrete`} style={{ marginTop: 12, display: "flex", gap: 12, alignItems: "center" }}>
         <span className="selo-icone selo-lembrete">
           <Icone nome="gotaSol" tamanho={24} />
         </span>
@@ -144,7 +145,7 @@ export default function Hoje() {
         <Icone nome="seta" tamanho={18} className="suave" />
       </Link>
 
-      <section className="card cor-agua cartao-agua" style={{ marginTop: 14 }} aria-label="Água rápida">
+      <section className="card cor-agua cartao-agua area-agua" style={{ marginTop: 14 }} aria-label="Água rápida">
         <Garrafa />
         <div className="card-cabeca">
           <span className="selo-icone cheio"><Icone nome="gota" tamanho={20} cheio /></span>
@@ -165,10 +166,11 @@ export default function Hoje() {
         </div>
       </section>
 
-      <div style={{ marginTop: 12 }}>
+      <div className="area-balanca" style={{ marginTop: 12 }}>
         <CardBalanca medidas={medidas} />
       </div>
 
+      <div className="area-proxima">
       <p className="rotulo-secao">Próxima refeição do plano</p>
       {proxima ? (
         <Link para="/comer" className="card card-toque cor-comida">
@@ -192,6 +194,9 @@ export default function Hoje() {
         </Link>
       )}
 
+      </div>
+
+      <div className="area-corrida">
       <p className="rotulo-secao">Última corrida</p>
       {ultima ? (
         <Link para={`/corrida/${ultima.id}`} className="card card-toque" style={{ padding: 0, overflow: "hidden" }}>
@@ -225,6 +230,7 @@ export default function Hoje() {
           </span>
         </Link>
       )}
+      </div>
     </div>
   );
 }
