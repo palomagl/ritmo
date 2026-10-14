@@ -1,8 +1,10 @@
 // ==============================================
 // Registrar refeição: foto do prato ou descrição
 // ==============================================
-// escolher → analisando → revisar → salvo. Nada é salvo sem a pessoa ver e
-// poder corrigir: a foto erra mais na quantidade do que no alimento.
+// escolher → (foto + o que tem no prato) → analisando → revisar → salvo.
+// Nada é salvo sem a pessoa ver e poder corrigir: dá para ajustar as porções
+// à mão ou contar à IA o que era de verdade ("era omelete, não crepioca"), e
+// ela refaz a lista olhando a mesma foto.
 
 import { useEffect, useRef, useState } from "react";
 import { dados, type ItemAlimento, type TipoRefeicao } from "@/dados";
@@ -15,7 +17,7 @@ import { ROTULO_COMPARACAO } from "./Comer";
 import { filaFotos, reduzirParaBase64 } from "@/lib/aparelho";
 import { dec, mudarPorcao, NOMES_REFEICAO, ORDEM_REFEICOES, refeicaoDoPlano, refeicaoPelaHora, somarItens } from "@/lib/nutricao";
 
-type Etapa = "escolher" | "analisando" | "revisar" | "erro";
+type Etapa = "escolher" | "foto" | "analisando" | "revisar" | "erro";
 
 export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) {
   const { perfil, dia, plano, hoje } = useEstado();
@@ -30,6 +32,8 @@ export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) 
   const [erro, setErro] = useState("");
   const [adicionando, setAdicionando] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [correcao, setCorrecao] = useState("");
+  const [corrigindo, setCorrigindo] = useState(false);
   const camera = useRef<HTMLInputElement>(null);
   const galeria = useRef<HTMLInputElement>(null);
 
@@ -41,12 +45,16 @@ export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) 
     pontosDeAtencao: perfil?.pontosDeAtencao ?? [],
   });
 
-  const analisar = async (f: { base64: string } | null, descricao?: string) => {
+  const analisar = async (f: { base64: string } | null, descricao?: string, ajuste?: string) => {
+    setCorrigindo(Boolean(ajuste));
     setEtapa("analisando");
     try {
-      const r = f ? await ia.analisarPrato(f.base64, contexto()) : await ia.analisarTexto(descricao ?? "", contexto());
+      const r = f
+        ? await ia.analisarPrato(f.base64, contexto(), { descricao, correcao: ajuste, itensAnteriores: ajuste ? itens : undefined })
+        : await ia.analisarTexto(ajuste ? `${descricao ?? ""}\n\nCorreção: ${ajuste}` : descricao ?? "", contexto());
       setAnalise(r);
       setItens(r.itens);
+      setCorrecao("");
       setEtapa("revisar");
     } catch (e) {
       setErro(e instanceof ErroIA ? e.message : "Não deu para analisar agora.");
@@ -81,7 +89,7 @@ export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) 
         navegar("/comer", { substituir: true });
         return;
       }
-      void analisar(f);
+      setEtapa("foto");
     } catch (e) {
       console.error(e);
       avisar("Não consegui abrir essa foto. Tente outra.");
@@ -171,10 +179,31 @@ export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) 
         </div>
       )}
 
+      {etapa === "foto" && foto && (
+        <div className="pilha">
+          <img className="foto-previa" src={`data:image/jpeg;base64,${foto.base64}`} alt="Seu prato" />
+          <div className="campo">
+            <label htmlFor="descricao-foto">O que tem no prato? (opcional)</label>
+            <textarea
+              id="descricao-foto"
+              className="entrada"
+              placeholder="Ex.: omelete de 2 ovos com banana e recheio de queijo"
+              value={texto}
+              onChange={(e) => setTexto(e.target.value)}
+            />
+            <span className="legenda">Contar ajuda a IA a acertar o que a foto não mostra: recheio, tipo de queijo, se é integral.</span>
+          </div>
+          <button className="botao cheio" onClick={() => analisar(foto, texto.trim() || undefined)}>
+            <Icone nome="brilho" tamanho={18} /> Analisar com a IA
+          </button>
+          <button className="botao texto" onClick={() => { setFoto(null); setEtapa("escolher"); }}>Trocar foto</button>
+        </div>
+      )}
+
       {etapa === "analisando" && (
         <div className="pilha">
           {foto && <img className="foto-previa" src={`data:image/jpeg;base64,${foto.base64}`} alt="Seu prato" style={{ opacity: 0.85 }} />}
-          <p className="subtitulo pulsando" style={{ textAlign: "center", margin: "6px 0" }}>{foto ? "Analisando seu prato…" : "Calculando…"}</p>
+          <p className="subtitulo pulsando" style={{ textAlign: "center", margin: "6px 0" }}>{corrigindo ? "Corrigindo com o que você contou…" : foto ? "Analisando seu prato…" : "Calculando…"}</p>
           <Esqueleto altura={56} />
           <Esqueleto altura={56} />
           <Esqueleto altura={56} />
@@ -187,7 +216,7 @@ export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) 
           <div className="card" role="alert">
             <p style={{ margin: 0 }}>{erro}</p>
           </div>
-          <button className="botao cheio" onClick={() => analisar(foto, texto)}>Tentar de novo</button>
+          <button className="botao cheio" onClick={() => analisar(foto, texto.trim() || undefined)}>Tentar de novo</button>
           {foto && <button className="botao secundario cheio" onClick={guardarParaDepois}>Guardar para analisar depois</button>}
         </div>
       )}
@@ -244,6 +273,20 @@ export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) 
               ))}
             </div>
           )}
+          <section className="card cor-comida corrigir-ia">
+            <label htmlFor="correcao" className="subtitulo" style={{ display: "block", marginBottom: 4 }}>A IA errou alguma coisa?</label>
+            <p className="legenda" style={{ margin: "0 0 10px" }}>Conte o que era de verdade e ela refaz a lista olhando a mesma foto.</p>
+            <textarea
+              id="correcao"
+              className="entrada"
+              placeholder="Ex.: não era crepioca, era omelete com banana e recheio de queijo"
+              value={correcao}
+              onChange={(e) => setCorrecao(e.target.value)}
+            />
+            <button className="botao cor cor-comida cheio" style={{ marginTop: 10 }} disabled={correcao.trim().length < 3} onClick={() => analisar(foto, texto.trim() || undefined, correcao.trim())}>
+              <Icone nome="brilho" tamanho={18} /> Corrigir com a IA
+            </button>
+          </section>
           <button className="botao contorno" onClick={() => setAdicionando(true)}>
             <Icone nome="mais" tamanho={18} /> Adicionar item esquecido
           </button>

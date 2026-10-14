@@ -55,3 +55,24 @@ Regras:
 - No máximo 3 frases curtas. Direta e gentil.
 - Baseie-se no plano: se houver substituição prevista, diga qual. Se não houver, sugira a troca mais próxima em equivalência e diga que vale confirmar com a nutricionista.
 - Não prescreva dieta, não mude metas, não dê diagnóstico. Para dúvidas médicas, oriente procurar a nutricionista ou o médico.`;
+
+/**
+ * O que a pessoa contou vale mais do que o que a foto parece: ela sabe o que
+ * comeu. Vai junto do PROMPT_PRATO quando existir.
+ */
+export function textoExtrasPrato(extras?: { descricao?: string; correcao?: string; itensAnteriores?: { nome: string; porcaoG: number }[] }): string {
+  if (!extras) return "";
+  const partes: string[] = [];
+  if (extras.descricao?.trim()) {
+    partes.push(
+      `O QUE A PESSOA CONTOU SOBRE O PRATO (é verdade; use a foto para estimar as porções e para achar o que ela não citou):\n${extras.descricao.trim()}`
+    );
+  }
+  if (extras.correcao?.trim()) {
+    const antes = (extras.itensAnteriores ?? []).map((i) => `- ${i.nome} (${Math.round(i.porcaoG)} g)`).join("\n");
+    partes.push(
+      `CORREÇÃO DA PESSOA. A análise anterior listou:\n${antes || "(nada)"}\n\nEla corrigiu: "${extras.correcao.trim()}"\n\nRefaça a lista inteira tratando a correção como verdade: troque, tire ou acrescente o que ela disse e mantenha o que ela não contestou. Recalcule calorias e macros dos itens que mudaram. Na "dica", não peça desculpas: só comente a refeição corrigida.`
+    );
+  }
+  return partes.length ? `\n\n${partes.join("\n\n")}` : "";
+}

@@ -10,8 +10,17 @@ const item = (nome: string, porcaoG: number, kcal: number, carboG: number, prote
 
 export function criarIADemo(): IA {
   return {
-    async analisarPrato(_foto, contexto) {
+    async analisarPrato(_foto, contexto, extras) {
       await espera(1600);
+      const contado = (extras?.correcao || extras?.descricao || "").toLowerCase();
+      if (contado.includes("omelete")) {
+        return {
+          itens: [item("Omelete (2 ovos)", 110, 165, 1, 13, 12), item("Banana", 70, 62, 16, 0.8, 0.2), item("Queijo muçarela", 30, 90, 1, 6.6, 6.8)],
+          confianca: "alta",
+          comparacaoPlano: contexto.refeicaoDoPlano ? "dentro" : "sem_plano",
+          dica: "Boa combinação de proteína e fruta para começar o dia.",
+        };
+      }
       return {
         itens: [
           item("Arroz branco", 130, 169, 37, 3.3, 0.3),

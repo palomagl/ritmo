@@ -11,7 +11,7 @@ import { getAI, getGenerativeModel, GoogleAIBackend, Schema, type GenerativeMode
 import { firebase } from "@/dados/firebase";
 import { normalizarItens, ORDEM_REFEICOES } from "@/lib/nutricao";
 import type { Plano, RefeicaoPlano, TipoRefeicao } from "@/dados/tipos";
-import { PROMPT_LAUDO, PROMPT_PERGUNTA, PROMPT_PLANO, PROMPT_PRATO, PROMPT_TEXTO } from "./prompts";
+import { PROMPT_LAUDO, PROMPT_PERGUNTA, PROMPT_PLANO, PROMPT_PRATO, PROMPT_TEXTO, textoExtrasPrato } from "./prompts";
 import { ErroIA, type AnalisePrato, type IA, type LeituraLaudo } from "./tipos";
 
 const MODELO = (import.meta.env.VITE_GEMINI_MODEL as string | undefined) || "gemini-3.5-flash-lite";
@@ -174,9 +174,9 @@ function paraAnalise(bruto: Partial<AnalisePrato>): AnalisePrato {
 
 export function criarGemini(): IA {
   return {
-    async analisarPrato(foto, contexto) {
+    async analisarPrato(foto, contexto, extras) {
       const bruto = await pedirJson<Partial<AnalisePrato>>("prato", esquemaPrato, [
-        `${PROMPT_PRATO}\n\nCONTEXTO:\n${JSON.stringify(contexto)}`,
+        `${PROMPT_PRATO}\n\nCONTEXTO:\n${JSON.stringify(contexto)}${textoExtrasPrato(extras)}`,
         { inlineData: { data: foto, mimeType: "image/jpeg" } },
       ]);
       return paraAnalise(bruto);

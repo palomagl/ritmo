@@ -8,7 +8,7 @@
 
 import { normalizarItens, ORDEM_REFEICOES } from "@/lib/nutricao";
 import type { Plano, RefeicaoPlano, TipoRefeicao } from "@/dados/tipos";
-import { PROMPT_LAUDO, PROMPT_PERGUNTA, PROMPT_PLANO, PROMPT_PRATO, PROMPT_TEXTO } from "./prompts";
+import { PROMPT_LAUDO, PROMPT_PERGUNTA, PROMPT_PLANO, PROMPT_PRATO, PROMPT_TEXTO, textoExtrasPrato } from "./prompts";
 import { ErroIA, type AnalisePrato, type Arquivo, type IA, type LeituraLaudo } from "./tipos";
 
 interface ErroSample {
@@ -102,12 +102,12 @@ export function criarIAClaude(reserva: IA): IA {
   }
 
   return {
-    analisarPrato: (foto, contexto) =>
+    analisarPrato: (foto, contexto, extras) =>
       usar(
-        () => reserva.analisarPrato(foto, contexto),
+        () => reserva.analisarPrato(foto, contexto, extras),
         async (s) =>
           paraAnalise(
-            await s.json<Partial<AnalisePrato>>(`${PROMPT_PRATO}\n\nCONTEXTO:\n${JSON.stringify(contexto)}\n\n${FORMATO_PRATO}`, {
+            await s.json<Partial<AnalisePrato>>(`${PROMPT_PRATO}\n\nCONTEXTO:\n${JSON.stringify(contexto)}${textoExtrasPrato(extras)}\n\n${FORMATO_PRATO}`, {
               images: [paraBlob({ base64: foto, mimeType: "image/jpeg" })],
               cache: false,
             })
