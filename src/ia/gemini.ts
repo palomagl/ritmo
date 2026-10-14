@@ -15,13 +15,20 @@ import { PROMPT_LAUDO, PROMPT_PERGUNTA, PROMPT_PLANO, PROMPT_PRATO, PROMPT_TEXTO
 import { ErroIA, type AnalisePrato, type IA, type LeituraLaudo } from "./tipos";
 
 const MODELO = (import.meta.env.VITE_GEMINI_MODEL as string | undefined) || "gemini-3.5-flash-lite";
-// Se o modelo principal estiver lotado ou sem cota no plano grátis, tenta o
-// outro antes de desistir. O "lite" tem a cota grátis mais folgada.
-const MODELOS = [...new Set([MODELO, "gemini-3.5-flash-lite", "gemini-3.5-flash"])];
+// Fotos (prato, plano, laudo) vão primeiro para o modelo que enxerga melhor;
+// texto e perguntas, para o mais rápido. Se um estiver lotado ou sem cota no
+// plano grátis, tenta o outro antes de desistir.
+const MELHOR_VISAO = "gemini-3.5-flash";
+const MODELOS_TEXTO = [...new Set([MODELO, "gemini-3.5-flash-lite", MELHOR_VISAO])];
+const MODELOS_FOTO = [...new Set([MELHOR_VISAO, MODELO, "gemini-3.5-flash-lite"])];
+const COM_FOTO = new Set(["prato", "plano", "laudo"]);
 
 // Raciocínio baixo: a resposta da foto sai mais rápida e gasta menos. O enum
 // só existe nas versões novas do SDK; nas antigas, o texto "LOW" vale igual.
-const POUCO_RACIOCINIO = (ai as unknown as { ThinkingLevel?: Record<string, string> }).ThinkingLevel?.LOW ?? "LOW";
+const NIVEIS = (ai as unknown as { ThinkingLevel?: Record<string, string> }).ThinkingLevel;
+const POUCO_RACIOCINIO = NIVEIS?.LOW ?? "LOW";
+// Na foto do prato vale pensar um pouco mais: é onde mora o erro de porção.
+const MAIS_RACIOCINIO = NIVEIS?.MEDIUM ?? "MEDIUM";
 
 // ----------------------------------------------
 // Formatos de resposta (a IA é obrigada a seguir)
@@ -44,7 +51,9 @@ const esquemaPrato = Schema.object({
     confianca: Schema.enumString({ enum: ["baixa", "media", "alta"] }),
     comparacaoPlano: Schema.enumString({ enum: ["dentro", "acima", "abaixo", "sem_plano"] }),
     dica: Schema.string(),
+    duvida: Schema.string(),
   },
+  optionalProperties: ["duvida"],
 });
 
 const esquemaPlano = Schema.object({
@@ -99,7 +108,7 @@ function modelo(nome: string, schema?: ReturnType<typeof Schema.object>, qual = 
     model: qual,
     generationConfig: {
       ...(schema ? { responseMimeType: "application/json", responseSchema: schema } : {}),
-      thinkingConfig: { thinkingLevel: POUCO_RACIOCINIO },
+      thinkingConfig: { thinkingLevel: nome === "prato" ? MAIS_RACIOCINIO : POUCO_RACIOCINIO },
     } as never,
   });
   modelos.set(chave, m);
@@ -112,10 +121,14 @@ function valeOutro(e: unknown): boolean {
   return /\b(429|500|503|404)\b/.test(t) || t.includes("high demand") || t.includes("overloaded") || t.includes("quota") || t.includes("unavailable") || t.includes("no longer available");
 }
 
+function temImagem(partes: unknown): boolean {
+  return Array.isArray(partes) && partes.some((p) => typeof p === "object" && p !== null && "inlineData" in p);
+}
+
 /** Chama o primeiro modelo da lista; se ele estiver indisponível, o próximo. */
 async function gerar(nome: string, schema: ReturnType<typeof Schema.object> | undefined, partes: Parameters<GenerativeModel["generateContent"]>[0]) {
   let ultimo: unknown;
-  for (const qual of MODELOS) {
+  for (const qual of COM_FOTO.has(nome) && temImagem(partes) ? MODELOS_FOTO : MODELOS_TEXTO) {
     try {
       return await modelo(nome, schema, qual).generateContent(partes);
     } catch (e) {
@@ -146,7 +159,7 @@ function traduzirErro(e: unknown): ErroIA {
     return new ErroIA("A IA do Google está lotada agora. Tente de novo em um minuto.");
   }
   if (texto.includes("not found") || texto.includes("404")) {
-    return new ErroIA(`O modelo ${MODELO} não está disponível. Troque VITE_GEMINI_MODEL na Vercel.`);
+    return new ErroIA(`O modelo da IA não está disponível. Troque VITE_GEMINI_MODEL na Vercel.`);
   }
   if (texto.includes("safety") || texto.includes("blocked")) {
     return new ErroIA("A IA não conseguiu analisar essa imagem. Tente outra foto ou descreva em texto.");
@@ -169,6 +182,7 @@ function paraAnalise(bruto: Partial<AnalisePrato>): AnalisePrato {
     confianca: bruto.confianca ?? "media",
     comparacaoPlano: bruto.comparacaoPlano ?? "sem_plano",
     dica: (bruto.dica ?? "").trim(),
+    duvida: (bruto.duvida ?? "").trim() || undefined,
   };
 }
 

@@ -7,9 +7,9 @@
 // ela refaz a lista olhando a mesma foto.
 
 import { useEffect, useRef, useState } from "react";
-import { dados, type ItemAlimento, type TipoRefeicao } from "@/dados";
+import { dados, type Favorito, type ItemAlimento, type TipoRefeicao } from "@/dados";
 import { ia, ErroIA, type AnalisePrato, type ContextoRefeicao } from "@/ia";
-import { useAvisos, useEstado } from "@/app/estado";
+import { useAvisos, useEstado, useObservar } from "@/app/estado";
 import { navegar, voltar } from "@/app/rota";
 import { Esqueleto, Folha, PassoNumero, Topo } from "@/componentes/basicos";
 import { Icone } from "@/componentes/Icone";
@@ -40,6 +40,7 @@ export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) 
   const [salvando, setSalvando] = useState(false);
   const [correcao, setCorrecao] = useState("");
   const [corrigindo, setCorrigindo] = useState(false);
+  const favoritos = useObservar<Favorito[]>((cb) => dados.observarFavoritos(cb), []);
   const camera = useRef<HTMLInputElement>(null);
   const galeria = useRef<HTMLInputElement>(null);
 
@@ -49,6 +50,7 @@ export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) 
     jaComidoHoje: { kcal: dia?.kcal ?? 0, carboG: dia?.carboG ?? 0, proteinaG: dia?.proteinaG ?? 0, gorduraG: dia?.gorduraG ?? 0 },
     metasDoDia: { kcal: perfil?.metas.kcal ?? 0, carboG: perfil?.metas.carboG ?? 0, proteinaG: perfil?.metas.proteinaG ?? 0, gorduraG: perfil?.metas.gorduraG ?? 0 },
     pontosDeAtencao: perfil?.pontosDeAtencao ?? [],
+    pratosFrequentes: (favoritos ?? []).slice(0, 8).map((f) => ({ nome: f.nome, itens: f.itens.map((i) => ({ nome: i.nome, porcaoG: i.porcaoG })) })),
   });
 
   const analisar = async (f: { base64: string } | null, descricao?: string, ajuste?: string) => {
@@ -86,7 +88,7 @@ export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) 
   const aoEscolherFoto = async (arquivo: File | undefined) => {
     if (!arquivo) return;
     try {
-      const [base64, miniatura] = await Promise.all([reduzirParaBase64(arquivo, 1024, 0.8), reduzirParaBase64(arquivo, 400, 0.6)]);
+      const [base64, miniatura] = await Promise.all([reduzirParaBase64(arquivo, 1536, 0.85), reduzirParaBase64(arquivo, 400, 0.6)]);
       const f = { base64, miniatura };
       setFoto(f);
       if (!navigator.onLine) {
@@ -280,7 +282,14 @@ export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) 
             </div>
           )}
           <section className="card cor-comida corrigir-ia">
-            <label htmlFor="correcao" className="subtitulo" style={{ display: "block", marginBottom: 4 }}>A IA errou alguma coisa?</label>
+            {analise.duvida && (
+              <p className="duvida-ia">
+                <Icone nome="balao" tamanho={18} /> <span><b>A IA ficou em dúvida:</b> {analise.duvida}</span>
+              </p>
+            )}
+            <label htmlFor="correcao" className="subtitulo" style={{ display: "block", marginBottom: 4 }}>
+              {analise.duvida ? "Responda ou corrija" : "A IA errou alguma coisa?"}
+            </label>
             <p className="legenda" style={{ margin: "0 0 10px" }}>Conte o que era de verdade e ela refaz a lista olhando a mesma foto.</p>
             <textarea
               id="correcao"

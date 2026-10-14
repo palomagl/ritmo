@@ -63,7 +63,7 @@ function paraBlob(a: Arquivo): Blob {
 }
 
 const FORMATO_PRATO = `Responda só com um objeto JSON neste formato:
-{"itens":[{"nome":"arroz branco","porcaoG":120,"kcal":156,"carboG":34,"proteinaG":3,"gorduraG":0.3}],"confianca":"baixa"|"media"|"alta","comparacaoPlano":"dentro"|"acima"|"abaixo"|"sem_plano","dica":"..."}`;
+{"itens":[{"nome":"arroz branco","porcaoG":120,"kcal":156,"carboG":34,"proteinaG":3,"gorduraG":0.3}],"confianca":"baixa"|"media"|"alta","comparacaoPlano":"dentro"|"acima"|"abaixo"|"sem_plano","dica":"...","duvida":"" }`;
 
 const FORMATO_PLANO = `Responda só com um objeto JSON neste formato (omita os campos opcionais que não existirem):
 {"refeicoes":[{"tipo":"cafe"|"lanche_manha"|"almoco"|"lanche_tarde"|"jantar"|"ceia","horario":"07:30","opcoes":["..."]}],"substituicoes":["..."],"metasDiarias":{"kcal":0,"carboG":0,"proteinaG":0,"gorduraG":0,"aguaMl":0},"observacoes":"..."}`;
@@ -79,6 +79,7 @@ function paraAnalise(bruto: Partial<AnalisePrato>): AnalisePrato {
     confianca: confs.includes(bruto.confianca as string) ? bruto.confianca! : "media",
     comparacaoPlano: comps.includes(bruto.comparacaoPlano as string) ? bruto.comparacaoPlano! : "sem_plano",
     dica: String(bruto.dica ?? "").trim().slice(0, 220),
+    duvida: String(bruto.duvida ?? "").trim().slice(0, 160) || undefined,
   };
 }
 

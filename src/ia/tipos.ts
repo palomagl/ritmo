@@ -7,6 +7,8 @@ export interface ContextoRefeicao {
   jaComidoHoje: Totais;
   metasDoDia: Pick<Metas, "kcal" | "carboG" | "proteinaG" | "gorduraG">;
   pontosDeAtencao: string[];
+  /** Pratos que a pessoa salvou como frequentes: ajudam a IA a reconhecer o que ela costuma comer. */
+  pratosFrequentes?: { nome: string; itens: { nome: string; porcaoG: number }[] }[];
 }
 
 export interface AnalisePrato {
@@ -14,6 +16,8 @@ export interface AnalisePrato {
   confianca: Confianca;
   comparacaoPlano: ComparacaoPlano;
   dica: string;
+  /** Uma pergunta da IA quando algo mudaria muito a conta ("o arroz é integral?"). */
+  duvida?: string;
 }
 
 export interface ExtrasPrato {

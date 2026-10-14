@@ -31,6 +31,7 @@ export function criarIADemo(): IA {
         confianca: "media",
         comparacaoPlano: contexto.refeicaoDoPlano ? "dentro" : "sem_plano",
         dica: "Prato equilibrado e dentro do plano. Um copo d'água agora ajuda a meta do dia.",
+        duvida: "O frango foi grelhado sem óleo ou na manteiga?",
       };
     },
     async analisarTexto(texto) {
