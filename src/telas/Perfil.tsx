@@ -272,7 +272,7 @@ function GuiaAtalho({ aberto, aoFechar }: { aberto: boolean; aoFechar: () => voi
   const urlGravar = d
     ? `https://firestore.googleapis.com/v1/projects/${d.projeto}/databases/(default)/documents/users/${d.uid}/pulsoDias/DATA?updateMask.fieldPaths=passos&updateMask.fieldPaths=passosSyncEm`
     : "";
-  const corpo = `{"fields":{"passos":{"integerValue":PASSOS},"passosSyncEm":{"timestampValue":"AGORA"}}}`;
+  const corpo = `{"fields":{"passos":{"integerValue":"PASSOS"},"passosSyncEm":{"timestampValue":"AGORA"}}}`;
 
   const Copiavel = ({ rotulo, valor, oculto }: { rotulo: string; valor: string; oculto?: boolean }) => (
     <div className="campo">
