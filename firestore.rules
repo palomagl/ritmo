@@ -1,0 +1,28 @@
+rules_version = '2';
+
+// ==============================================
+// Regras de segurança do Firestore (Pulso)
+// ==============================================
+// Iguais às do Minha Rotina, de propósito: se os dois apps dividem o mesmo
+// projeto, uma regra só protege os dois.
+//
+// Todo dado mora embaixo de /users/{uid}, e só a dona daquele uid alcança o
+// caminho. O Atalho do iPhone que manda os passos entra com o token da
+// própria pessoa, então passa por esta mesma regra.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      match /{document=**} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+  }
+}
