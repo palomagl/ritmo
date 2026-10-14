@@ -109,11 +109,13 @@ function traduzirErro(e: unknown): ErroIA {
   if (!navigator.onLine || texto.includes("network") || texto.includes("failed to fetch")) {
     return new ErroIA("Sem internet agora. A foto fica guardada e dá para analisar depois.");
   }
-  if (texto.includes("429") || texto.includes("quota") || texto.includes("resource_exhausted") || texto.includes("rate")) {
-    return new ErroIA("A IA atingiu o limite gratuito por agora. Tente de novo em alguns minutos.");
-  }
-  if (texto.includes("app check") || texto.includes("appcheck") || texto.includes("401") || texto.includes("403")) {
+  // Primeiro o acesso: a mensagem do Google cita "generateContent", então
+  // procurar só por "rate" confundiria qualquer erro com limite de uso.
+  if (texto.includes("app check") || texto.includes("appcheck") || /\b(401|403)\b/.test(texto) || texto.includes("unauthenticated") || texto.includes("permission")) {
     return new ErroIA("A IA recusou o acesso. Confira o App Check e o AI Logic no Firebase (veja o README).");
+  }
+  if (/\b429\b/.test(texto) || texto.includes("quota") || texto.includes("resource_exhausted") || texto.includes("rate limit")) {
+    return new ErroIA("A IA atingiu o limite gratuito por agora. Tente de novo em alguns minutos.");
   }
   if (texto.includes("not found") || texto.includes("404")) {
     return new ErroIA(`O modelo ${MODELO} não está disponível. Troque VITE_GEMINI_MODEL na Vercel.`);
