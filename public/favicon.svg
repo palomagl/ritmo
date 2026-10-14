@@ -6,6 +6,6 @@
       <stop offset="1" stop-color="#8B5CF6"/>
     </linearGradient>
   </defs>
-  <path d="M32 3S9 27 9 43a23 23 0 0 0 46 0C55 27 32 3 32 3Z" fill="url(#g)"/>
-  <path d="M15 44h10l3.5-7 4.5 13 4-10 2.5 4H49" fill="none" stroke="#fff" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M32 3S11 26 11 41a21 21 0 0 0 42 0C53 26 32 3 32 3Z" fill="url(#g)"/>
+  <path d="M16 42h9l3.5-7.5 4.5 14 4-10.5 2.5 4H48" fill="none" stroke="#fff" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

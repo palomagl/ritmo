@@ -83,9 +83,9 @@ export function Marca({ tamanho = 44 }: { tamanho?: number }) {
           <stop offset="1" stopColor="#fff" stopOpacity="0" />
         </radialGradient>
       </defs>
-      <path d="M32 3S9 27 9 43a23 23 0 0 0 46 0C55 27 32 3 32 3Z" fill={`url(#m${id})`} />
-      <path d="M32 3S9 27 9 43a23 23 0 0 0 46 0C55 27 32 3 32 3Z" fill={`url(#l${id})`} />
-      <path d="M15 44h10l3.5-8 4.5 15 4-11 2.5 4H49" stroke="#fff" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M32 3S11 26 11 41a21 21 0 0 0 42 0C53 26 32 3 32 3Z" fill={`url(#m${id})`} />
+      <path d="M32 3S11 26 11 41a21 21 0 0 0 42 0C53 26 32 3 32 3Z" fill={`url(#l${id})`} />
+      <path d="M16 42h9l3.5-7.5 4.5 14 4-10.5 2.5 4H48" stroke="#fff" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
