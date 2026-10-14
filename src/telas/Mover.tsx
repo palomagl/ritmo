@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { dados, MODO_PESSOAL, type Corrida, type Dia } from "@/dados";
+import { dados, type Corrida, type Dia } from "@/dados";
 import { useAvisos, useEstado, useObservar } from "@/app/estado";
 import { Link, navegar } from "@/app/rota";
 import { Anel, Esqueleto, Folha, Vazio } from "@/componentes/basicos";
@@ -86,28 +86,12 @@ function Passos() {
           <div className="num-grande">{milhar(passos)}</div>
           <div className="legenda">passos hoje · meta {milhar(meta)}</div>
           <div className="legenda" style={{ marginTop: 6 }}>
-            {dia.passosSyncEm ? `${MODO_PESSOAL ? "Anotado" : "Sincronizado"} às ${horaMinuto(dia.passosSyncEm)}` : MODO_PESSOAL ? "Ainda não anotado hoje" : "Ainda não sincronizou hoje"}
+            {dia.passosSyncEm ? `Sincronizado às ${horaMinuto(dia.passosSyncEm)}` : "Ainda não sincronizou hoje"}
           </div>
         </div>
       </section>
 
-      {MODO_PESSOAL ? (
-        <button
-          className="card card-toque cor-passos linha"
-          onClick={() => {
-            setDiaCorrecao(hoje);
-            setValorCorrecao(String(dia.passos ?? ""));
-            setCorrigindo(true);
-          }}
-        >
-          <span className="selo-icone"><Icone nome="pegadas" tamanho={18} /></span>
-          <span className="cresce">
-            <b>Anotar os passos de hoje</b>
-            <br />
-            <span className="legenda">Copie o número do app Saúde. Quando o app for publicado, um Atalho do iPhone faz isso sozinho.</span>
-          </span>
-        </button>
-      ) : nuncaSincronizou && (
+      {nuncaSincronizou && (
         <Link para="/perfil" className="card card-toque cor-passos linha">
           <span className="selo-icone"><Icone nome="atualizar" tamanho={18} /></span>
           <span className="cresce">
@@ -278,7 +262,7 @@ function Corridas() {
         </div>
       </section>
 
-      <button className="botao marca cheio" style={{ minHeight: 56, fontSize: 17 }} onClick={() => navegar("/corrida/ao-vivo")}>
+      <button className="botao cheio" style={{ minHeight: 56, fontSize: 17 }} onClick={() => navegar("/corrida/ao-vivo")}>
         <Icone nome="play" cheio tamanho={20} /> Iniciar corrida
       </button>
       <button className="botao contorno" onClick={() => arquivo.current?.click()}>
