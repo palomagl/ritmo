@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { dados, type Corrida, type Dia, type Medida, type Refeicao } from "@/dados";
 import { useAgoraH, useEstado, useObservar } from "@/app/estado";
 import { useRegistrarAgua } from "@/app/acoes";
@@ -6,7 +6,7 @@ import { Link, navegar } from "@/app/rota";
 import { Esqueleto } from "@/componentes/basicos";
 import { PulsoDoDia, type EventoDia } from "@/componentes/PulsoDoDia";
 import { CardBalanca } from "@/componentes/Balanca";
-import { Icone } from "@/componentes/Icone";
+import { Icone, type NomeIcone } from "@/componentes/Icone";
 import { RotaSvg } from "@/componentes/Mapa";
 import { chaveDia, dataPorExtenso, saudacao, somarDias } from "@/lib/datas";
 import { formatarMl, ritmoDaAgua, sequenciaDeMeta } from "@/lib/agua";
@@ -72,11 +72,19 @@ export default function Hoje() {
     <div>
       <header className="topo-hoje">
         <div>
-          <p className="legenda" style={{ margin: 0 }}>{dataPorExtenso()}</p>
-          <h1 className="titulo">
+          <p className="data-hoje">
+            <Icone nome="calendario" tamanho={17} /> {dataPorExtenso()}
+          </p>
+          <h1 className="saudacao">
             {saudacao()}
-            {primeiroNome ? `, ${primeiroNome}` : ""}
+            {primeiroNome ? (
+              <>
+                ,<br />
+                <span className="nome-grad">{primeiroNome}</span>
+              </>
+            ) : null}
           </h1>
+          <p className="frase-dia">{fraseDoDia(hoje)}</p>
         </div>
         <Link para="/perfil" className="avatar" aria-label="Perfil e configurações">
           {perfil.foto || usuario?.foto ? <img src={(perfil.foto || usuario?.foto)!} alt="" referrerPolicy="no-referrer" /> : iniciais}
@@ -85,13 +93,19 @@ export default function Hoje() {
 
       <section className="card hero-dia" aria-label="Resumo do dia">
         <div className="hero-cabeca">
-          <span>Seu ritmo hoje</span>
-          <span className="legenda">{eventos.length === 1 ? "1 registro" : `${eventos.length} registros`}</span>
+          <span className="selo-marca">
+            <Icone nome="pulso" tamanho={20} strokeWidth={2.4} />
+          </span>
+          <span className="cresce">Seu ritmo hoje</span>
+          <span className="pilula vidro-pilula">
+            <Icone nome="pulso" tamanho={14} /> {eventos.length === 1 ? "1 registro" : `${eventos.length} registros`}
+          </span>
         </div>
         <PulsoDoDia eventos={eventos} acordaH={perfil.acordaH} dormeH={perfil.dormeH} agoraH={agoraH} />
         <div className="metricas-dia">
           <Metrica
             cor="passos"
+            icone="pegadas"
             nome="Passos"
             valor={milhar(passos)}
             meta={`de ${milhar(m.passos)}`}
@@ -100,6 +114,7 @@ export default function Hoje() {
           />
           <Metrica
             cor="agua"
+            icone="gota"
             nome="Água"
             valor={formatarMl(agua)}
             meta={`de ${formatarMl(m.aguaMl)}`}
@@ -108,6 +123,7 @@ export default function Hoje() {
           />
           <Metrica
             cor="comida"
+            icone="comer"
             nome={comidaCarbo ? "Carbo" : "Comida"}
             valor={comidaCarbo ? `${Math.round(comida)} g` : milhar(comida)}
             meta={comidaCarbo ? `de ${metaComida} g` : `de ${milhar(metaComida)} kcal`}
@@ -119,15 +135,15 @@ export default function Hoje() {
 
       <Link para={insight.rota} className={`card card-toque cor-${insight.cor}`} style={{ marginTop: 12, display: "flex", gap: 12, alignItems: "center" }}>
         <span className="selo-icone">
-          <Icone nome="brilho" tamanho={18} />
+          <Icone nome="brilho" tamanho={20} />
         </span>
-        <span className="cresce" style={{ fontWeight: 500 }}>{insight.texto}</span>
+        <span className="cresce lembrete">{destacarNumeros(insight.texto)}</span>
         <Icone nome="seta" tamanho={18} className="suave" />
       </Link>
 
       <section className="card cor-agua" style={{ marginTop: 12 }} aria-label="Água rápida">
         <div className="card-cabeca">
-          <span className="selo-icone"><Icone nome="gota" tamanho={18} /></span>
+          <span className="selo-icone cheio"><Icone nome="gota" tamanho={20} cheio /></span>
           <div className="cresce">
             <p className="subtitulo">Água</p>
             <p className="legenda" style={{ margin: 0 }}>
@@ -209,12 +225,36 @@ export default function Hoje() {
   );
 }
 
-function Metrica({ cor, nome, valor, meta, fracao, onClick }: { cor: string; nome: string; valor: string; meta: string; fracao: number; onClick: () => void }) {
+const FRASES = [
+  "Disciplina hoje, resultados amanhã.",
+  "Pequenos hábitos, grandes resultados.",
+  "Cada gota conta.",
+  "Um passo de cada vez.",
+  "Constância vale mais que pressa.",
+  "Seu corpo agradece o cuidado de hoje.",
+  "Hoje é um bom dia para cuidar de você.",
+];
+
+/** Uma frase por dia, sempre a mesma no mesmo dia. */
+function fraseDoDia(chave: string): string {
+  const n = chave.split("-").reduce((s, p) => s + parseInt(p, 10), 0);
+  return FRASES[n % FRASES.length];
+}
+
+/** Deixa os números do lembrete em negrito ("Faltam **900 ml** para..."). */
+function destacarNumeros(texto: string): ReactNode[] {
+  return texto.split(/(\d[\d.,]*\s?(?:ml|L|kcal|g|km|passos|min)?\b)/).map((parte, i) => (i % 2 === 1 ? <b key={i}>{parte}</b> : parte));
+}
+
+function Metrica({ cor, icone, nome, valor, meta, fracao, onClick }: { cor: string; icone: NomeIcone; nome: string; valor: string; meta: string; fracao: number; onClick: () => void }) {
   const f = Math.max(0, Math.min(1, fracao));
   return (
     <button className={`metrica cor-${cor}`} onClick={onClick} aria-label={`${nome}: ${valor} ${meta}`}>
       <span className="metrica-nome">
-        <i className="ponto" /> {nome}
+        <span className="metrica-icone">
+          <Icone nome={icone} tamanho={14} strokeWidth={2.4} />
+        </span>
+        {nome}
       </span>
       <span className="metrica-valor">{valor}</span>
       <span className="metrica-barra">

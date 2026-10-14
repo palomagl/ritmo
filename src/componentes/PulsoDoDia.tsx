@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useId, useMemo } from "react";
 
 export type TipoEvento = "agua" | "comida" | "corrida";
 
@@ -12,8 +12,6 @@ const ALTURA: Record<TipoEvento, number> = { agua: 22, comida: 40, corrida: 58 }
 const COR: Record<TipoEvento, string> = { agua: "var(--agua)", comida: "var(--comida)", corrida: "var(--pulso)" };
 
 const L = 340; // largura do desenho
-const BASE = 78; // linha de base
-const ALT = 108; // altura do desenho
 const MARGEM = 8;
 const MIN_DIST = 11; // picos mais perto que isso se afastam
 
@@ -46,6 +44,12 @@ export function PulsoDoDia({ eventos, acordaH, dormeH, agoraH }: { eventos: Even
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventos, acordaH, fim, xAgora]);
 
+  // A altura se ajusta: sem registros é só a linha do tempo; com picos, cresce.
+  const maiorPico = picos.reduce((m, p) => Math.max(m, ALTURA[p.tipo]), 0);
+  const BASE = 12 + maiorPico;
+  const ALT = BASE + (maiorPico ? 12 : 8) + 18;
+  const uid = useId().replace(/:/g, "");
+
   // Um caminho só, com o formato de um batimento em cada pico.
   const d = useMemo(() => {
     let s = `M ${MARGEM} ${BASE}`;
@@ -55,7 +59,7 @@ export function PulsoDoDia({ eventos, acordaH, dormeH, agoraH }: { eventos: Even
     }
     s += ` L ${L - MARGEM} ${BASE}`;
     return s;
-  }, [picos]);
+  }, [picos, BASE]);
 
   const meio = Math.round((acordaH + fim) / 2) % 24;
   const hora = (h: number) => `${Math.round(h) % 24}h`;
@@ -63,20 +67,22 @@ export function PulsoDoDia({ eventos, acordaH, dormeH, agoraH }: { eventos: Even
   return (
     <svg className="pulso-dia" viewBox={`0 0 ${L} ${ALT}`} role="img" aria-label={`Seu dia até agora: ${picos.length} registros`}>
       <defs>
-        <clipPath id="pd-passado">
+        <linearGradient id={`g${uid}`} x1="0" y1="0" x2={L} y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#a78bfa" />
+          <stop offset="0.5" stopColor="#6366f1" />
+          <stop offset="1" stopColor="#3b82f6" />
+        </linearGradient>
+        <clipPath id={`p${uid}`}>
           <rect x="0" y="0" width={xAgora} height={ALT} />
         </clipPath>
-        <clipPath id="pd-futuro">
-          <rect x={xAgora} y="0" width={L - xAgora} height={ALT} />
-        </clipPath>
       </defs>
-      <path d={d} className="pd-futuro" clipPath="url(#pd-futuro)" />
-      <path d={d} className="pd-passado" clipPath="url(#pd-passado)" pathLength={1} />
+      <line x1={MARGEM} y1={BASE} x2={L - MARGEM} y2={BASE} className="pd-trilha" />
+      <path d={d} className="pd-passado" clipPath={`url(#p${uid})`} pathLength={1} stroke={`url(#g${uid})`} />
       {picos.map((p, i) => (
-        <circle key={i} cx={p.x} cy={BASE - ALTURA[p.tipo]} r={3.4} fill={COR[p.tipo]} className="pd-ponto" />
+        <circle key={i} cx={p.x} cy={BASE - ALTURA[p.tipo]} r={3.6} fill={COR[p.tipo]} className="pd-ponto" />
       ))}
-      <circle cx={xAgora} cy={BASE} r={9} className="pd-agora-halo" />
-      <circle cx={xAgora} cy={BASE} r={4.5} className="pd-agora" />
+      <circle cx={xAgora} cy={BASE} r={11} className="pd-agora-halo" />
+      <circle cx={xAgora} cy={BASE} r={6.5} className="pd-agora" />
       <text x={MARGEM} y={ALT - 2} className="pd-hora">{hora(acordaH)}</text>
       <text x={L / 2} y={ALT - 2} className="pd-hora" textAnchor="middle">{`${meio}h`}</text>
       <text x={L - MARGEM} y={ALT - 2} className="pd-hora" textAnchor="end">{hora(fim)}</text>
