@@ -1,7 +1,7 @@
 // Ícones do Ritmo: traço de 2 px, cantos redondos, 24×24. Desenhados aqui
 // para o app não depender de biblioteca de ícones.
 
-import type { SVGProps } from "react";
+import { useId, type SVGProps } from "react";
 
 const CAMINHOS = {
   hoje: "M4 11.5 12 5l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5h-5v5H5a1 1 0 0 1-1-1z",
@@ -39,6 +39,8 @@ const CAMINHOS = {
   pegadas: "M7.5 4.5c1.4 0 2.2 1.6 2.2 3.4S8.9 11 7.6 11s-2.3-1.2-2.3-3S6.1 4.5 7.5 4.5zM6.2 13.4h2.9l-.3 2.6c-.1 1-.9 1.6-1.8 1.5-.9-.1-1.4-.9-1.3-1.8zM16.5 7.5c1.4 0 2.2 1.6 2.2 3.4s-.8 3.1-2.1 3.1-2.3-1.2-2.3-3 .8-3.5 2.2-3.5zM15.2 16.4h2.9l-.3 2.6c-.1 1-.9 1.6-1.8 1.5-.9-.1-1.4-.9-1.3-1.8z",
   atualizar: "M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v4h-4",
   menos: "M5 12h14",
+  calendario: "M5 6.5h14a1 1 0 0 1 1 1V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7.5a1 1 0 0 1 1-1zM4 10.5h16M8.5 4v4M15.5 4v4",
+  pulso: "M3 12h4l2.5-5 4 10 2.5-5H21",
 } as const;
 
 export type NomeIcone = keyof typeof CAMINHOS;
@@ -62,11 +64,25 @@ export function Icone({ nome, tamanho = 22, cheio = false, ...resto }: { nome: N
   );
 }
 
-/** A marca do Ritmo: uma linha de pulso. */
-export function Marca({ tamanho = 44, cor = "#fff" }: { tamanho?: number; cor?: string }) {
+/** A marca do ritmo: uma gota com um pulso dentro. */
+export function Marca({ tamanho = 44 }: { tamanho?: number }) {
+  const id = useId().replace(/:/g, "");
   return (
-    <svg width={tamanho} height={tamanho} viewBox="0 0 48 48" fill="none" aria-hidden="true">
-      <path d="M6 26h8l4-10 7 20 5-14 3 4h9" stroke={cor} strokeWidth={4.5} strokeLinecap="round" strokeLinejoin="round" />
+    <svg width={tamanho} height={tamanho} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id={`m${id}`} x1="0.3" y1="0" x2="0.7" y2="1">
+          <stop offset="0" stopColor="#60A5FA" />
+          <stop offset="0.55" stopColor="#3B82F6" />
+          <stop offset="1" stopColor="#8B5CF6" />
+        </linearGradient>
+        <radialGradient id={`l${id}`} cx="0.38" cy="0.32" r="0.55">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.5" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <path d="M32 3S9 27 9 43a23 23 0 0 0 46 0C55 27 32 3 32 3Z" fill={`url(#m${id})`} />
+      <path d="M32 3S9 27 9 43a23 23 0 0 0 46 0C55 27 32 3 32 3Z" fill={`url(#l${id})`} />
+      <path d="M15 44h10l3.5-8 4.5 15 4-11 2.5 4H49" stroke="#fff" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

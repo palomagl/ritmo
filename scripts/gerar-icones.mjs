@@ -8,19 +8,19 @@ import sharp from "sharp";
 import { readFile, mkdir } from "node:fs/promises";
 
 const LOGO = await readFile("public/logo.svg");
-const FUNDO = "#F2F2F5";
+const FUNDO = "#EEF3FA";
 
-/** Ícone: o logo inteiro (fundo coral), no tamanho pedido. O sistema arredonda. */
+/** Ícone: o logo inteiro (gota sobre azul bem claro), no tamanho pedido. O sistema arredonda. */
 async function icone(lado, saida, respiro = 0) {
   if (respiro === 0) {
     await sharp(LOGO, { density: 384 }).resize(lado, lado).png().toFile(saida);
     return;
   }
-  // "maskable" (Android): o desenho encolhe e o coral preenche a borda,
-  // para nenhum recorte de launcher cortar a linha de pulso.
+  // "maskable" (Android): o desenho encolhe e o azul claro preenche a borda,
+  // para nenhum recorte de launcher cortar a gota.
   const miolo = Math.round(lado * (1 - respiro * 2));
   const desenho = await sharp(LOGO, { density: 384 }).resize(miolo, miolo).png().toBuffer();
-  await sharp({ create: { width: lado, height: lado, channels: 4, background: "#FF5A4E" } })
+  await sharp({ create: { width: lado, height: lado, channels: 4, background: "#E8EEFB" } })
     .composite([{ input: desenho, gravity: "center" }])
     .png()
     .toFile(saida);
