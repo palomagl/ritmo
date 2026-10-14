@@ -28,6 +28,10 @@ export default function Comer() {
     void filaFotos.listar().then(setPendentes);
   }, []);
 
+  // Nome do prato frequente sendo digitado (null = campo fechado).
+  const [nomeFavorito, setNomeFavorito] = useState<string | null>(null);
+
+  // Os hooks ficam todos acima: depois deste retorno antecipado não pode haver nenhum.
   if (!perfil || !dia) return <Esqueleto altura={220} raio={22} />;
   const m = perfil.metas;
 
@@ -48,8 +52,6 @@ export default function Comer() {
     avisar(`${f.nome} registrado`);
   };
 
-  // Nome do prato frequente sendo digitado (null = campo fechado).
-  const [nomeFavorito, setNomeFavorito] = useState<string | null>(null);
   const salvarComoFavorito = async (r: Refeicao) => {
     const nome = (nomeFavorito ?? "").trim();
     if (!nome) return;
