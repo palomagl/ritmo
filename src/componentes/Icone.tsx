@@ -41,6 +41,9 @@ const CAMINHOS = {
   menos: "M5 12h14",
   calendario: "M5 6.5h14a1 1 0 0 1 1 1V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7.5a1 1 0 0 1 1-1zM4 10.5h16M8.5 4v4M15.5 4v4",
   pulso: "M3 12h4l2.5-5 4 10 2.5-5H21",
+  flecha: "M5 12h14M13 6l6 6-6 6",
+  digital: "M12 4.5a7.5 7.5 0 0 0-7.5 7.5v1.5M19.5 13v-1a7.5 7.5 0 0 0-3.2-6.1M8.8 20a12 12 0 0 1-1.3-5.5V12a4.5 4.5 0 0 1 9 0v2M12 12v2.5a9 9 0 0 0 1.6 5.1M16.3 17.5a12 12 0 0 0 .2-2",
+  gotaSol: "M12 8.5s3 3.2 3 5.3a3 3 0 0 1-6 0c0-2.1 3-5.3 3-5.3zM12 3v1.8M5.6 5.6l1.3 1.3M18.4 5.6l-1.3 1.3M3 12.5h1.8M19.2 12.5H21",
 } as const;
 
 export type NomeIcone = keyof typeof CAMINHOS;

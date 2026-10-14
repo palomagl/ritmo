@@ -73,7 +73,7 @@ export default function Hoje() {
       <header className="topo-hoje">
         <div>
           <p className="data-hoje">
-            <Icone nome="calendario" tamanho={17} /> {dataPorExtenso()}
+            <span className="data-icone"><Icone nome="calendario" tamanho={16} /></span> {dataPorExtenso()}
           </p>
           <h1 className="saudacao">
             {saudacao()}
@@ -84,21 +84,24 @@ export default function Hoje() {
               </>
             ) : null}
           </h1>
-          <p className="frase-dia">{fraseDoDia(hoje)}</p>
+          <Link para={insight.rota} className="frase-dia">
+            {fraseDoDia(hoje)} <Icone nome="flecha" tamanho={18} />
+          </Link>
         </div>
-        <Link para="/perfil" className="avatar" aria-label="Perfil e configurações">
+        <Link para="/perfil" className="avatar avatar-bolha" aria-label="Perfil e configurações">
           {perfil.foto || usuario?.foto ? <img src={(perfil.foto || usuario?.foto)!} alt="" referrerPolicy="no-referrer" /> : iniciais}
+          <i className="avatar-ponto" aria-hidden="true" />
         </Link>
       </header>
 
       <section className="card hero-dia" aria-label="Resumo do dia">
         <div className="hero-cabeca">
           <span className="selo-marca">
-            <Icone nome="pulso" tamanho={20} strokeWidth={2.4} />
+            <Icone nome="pulso" tamanho={24} strokeWidth={2.4} />
           </span>
-          <span className="cresce">Seu ritmo hoje</span>
+          <span className="cresce">Seu pulso hoje</span>
           <span className="pilula vidro-pilula">
-            <Icone nome="pulso" tamanho={14} /> {eventos.length === 1 ? "1 registro" : `${eventos.length} registros`}
+            <Icone nome="digital" tamanho={18} /> {eventos.length === 1 ? "1 registro" : `${eventos.length} registros`}
           </span>
         </div>
         <PulsoDoDia eventos={eventos} acordaH={perfil.acordaH} dormeH={perfil.dormeH} agoraH={agoraH} />
@@ -134,14 +137,15 @@ export default function Hoje() {
       </section>
 
       <Link para={insight.rota} className={`card card-toque cor-${insight.cor}`} style={{ marginTop: 12, display: "flex", gap: 12, alignItems: "center" }}>
-        <span className="selo-icone">
-          <Icone nome="brilho" tamanho={20} />
+        <span className="selo-icone selo-lembrete">
+          <Icone nome="gotaSol" tamanho={24} />
         </span>
         <span className="cresce lembrete">{destacarNumeros(insight.texto)}</span>
         <Icone nome="seta" tamanho={18} className="suave" />
       </Link>
 
-      <section className="card cor-agua" style={{ marginTop: 12 }} aria-label="Água rápida">
+      <section className="card cor-agua cartao-agua" style={{ marginTop: 14 }} aria-label="Água rápida">
+        <Garrafa />
         <div className="card-cabeca">
           <span className="selo-icone cheio"><Icone nome="gota" tamanho={20} cheio /></span>
           <div className="cresce">
@@ -252,7 +256,7 @@ function Metrica({ cor, icone, nome, valor, meta, fracao, onClick }: { cor: stri
     <button className={`metrica cor-${cor}`} onClick={onClick} aria-label={`${nome}: ${valor} ${meta}`}>
       <span className="metrica-nome">
         <span className="metrica-icone">
-          <Icone nome={icone} tamanho={14} strokeWidth={2.4} />
+          <Icone nome={icone} tamanho={18} strokeWidth={icone === "comer" ? 2.6 : 1.4} cheio={icone !== "comer"} />
         </span>
         {nome}
       </span>
@@ -262,5 +266,36 @@ function Metrica({ cor, icone, nome, valor, meta, fracao, onClick }: { cor: stri
       </span>
       <span className="metrica-meta">{meta}</span>
     </button>
+  );
+}
+
+/** Garrafinha translúcida no canto do cartão de água (só enfeite). */
+function Garrafa() {
+  return (
+    <svg className="garrafa" viewBox="0 0 120 150" aria-hidden="true">
+      <defs>
+        <linearGradient id="garrafa-corpo" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#ffffff" stopOpacity="0.9" />
+          <stop offset="0.5" stopColor="#bfdbfe" stopOpacity="0.55" />
+          <stop offset="1" stopColor="#93c5fd" stopOpacity="0.45" />
+        </linearGradient>
+        <linearGradient id="garrafa-agua" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#93c5fd" stopOpacity="0.55" />
+          <stop offset="1" stopColor="#3b82f6" stopOpacity="0.45" />
+        </linearGradient>
+        <linearGradient id="garrafa-folha" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#86efac" />
+          <stop offset="1" stopColor="#16a34a" />
+        </linearGradient>
+      </defs>
+      <g transform="rotate(18 60 80)">
+        <rect x="48" y="6" width="26" height="16" rx="4" fill="#334155" opacity="0.85" />
+        <rect x="46" y="20" width="30" height="8" rx="3" fill="#475569" opacity="0.7" />
+        <path d="M44 30h34c6 6 10 14 10 24v74a12 12 0 0 1-12 12H46a12 12 0 0 1-12-12V54c0-10 4-18 10-24z" fill="url(#garrafa-corpo)" stroke="#ffffff" strokeOpacity="0.9" strokeWidth="1.5" />
+        <path d="M34 92h54v36a12 12 0 0 1-12 12H46a12 12 0 0 1-12-12z" fill="url(#garrafa-agua)" />
+        <path d="M42 46v70" stroke="#ffffff" strokeOpacity="0.85" strokeWidth="4" strokeLinecap="round" />
+      </g>
+      <path d="M96 150c-4-26 4-46 22-58-2 24-8 42-22 58z" fill="url(#garrafa-folha)" opacity="0.9" />
+    </svg>
   );
 }
