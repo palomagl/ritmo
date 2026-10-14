@@ -14,7 +14,10 @@ import type { Plano, RefeicaoPlano, TipoRefeicao } from "@/dados/tipos";
 import { PROMPT_LAUDO, PROMPT_PERGUNTA, PROMPT_PLANO, PROMPT_PRATO, PROMPT_TEXTO } from "./prompts";
 import { ErroIA, type AnalisePrato, type IA, type LeituraLaudo } from "./tipos";
 
-const MODELO = (import.meta.env.VITE_GEMINI_MODEL as string | undefined) || "gemini-3.5-flash";
+const MODELO = (import.meta.env.VITE_GEMINI_MODEL as string | undefined) || "gemini-3.5-flash-lite";
+// Se o modelo principal estiver lotado ou sem cota no plano grátis, tenta o
+// outro antes de desistir. O "lite" tem a cota grátis mais folgada.
+const MODELOS = [...new Set([MODELO, "gemini-3.5-flash-lite", "gemini-3.5-flash"])];
 
 // Raciocínio baixo: a resposta da foto sai mais rápida e gasta menos. O enum
 // só existe nas versões novas do SDK; nas antigas, o texto "LOW" vale igual.
@@ -87,19 +90,41 @@ const esquemaLaudo = Schema.object({
 
 const modelos = new Map<string, GenerativeModel>();
 
-function modelo(nome: string, schema?: ReturnType<typeof Schema.object>): GenerativeModel {
-  const existente = modelos.get(nome);
+function modelo(nome: string, schema?: ReturnType<typeof Schema.object>, qual = MODELO): GenerativeModel {
+  const chave = `${nome}:${qual}`;
+  const existente = modelos.get(chave);
   if (existente) return existente;
   const instancia = getAI(firebase().app, { backend: new GoogleAIBackend() });
   const m = getGenerativeModel(instancia, {
-    model: MODELO,
+    model: qual,
     generationConfig: {
       ...(schema ? { responseMimeType: "application/json", responseSchema: schema } : {}),
       thinkingConfig: { thinkingLevel: POUCO_RACIOCINIO },
     } as never,
   });
-  modelos.set(nome, m);
+  modelos.set(chave, m);
   return m;
+}
+
+/** Erros em que vale tentar o próximo modelo: lotado, sem cota ou fora do ar. */
+function valeOutro(e: unknown): boolean {
+  const t = String((e as Error)?.message ?? e).toLowerCase();
+  return /\b(429|500|503|404)\b/.test(t) || t.includes("high demand") || t.includes("overloaded") || t.includes("quota") || t.includes("unavailable") || t.includes("no longer available");
+}
+
+/** Chama o primeiro modelo da lista; se ele estiver indisponível, o próximo. */
+async function gerar(nome: string, schema: ReturnType<typeof Schema.object> | undefined, partes: Parameters<GenerativeModel["generateContent"]>[0]) {
+  let ultimo: unknown;
+  for (const qual of MODELOS) {
+    try {
+      return await modelo(nome, schema, qual).generateContent(partes);
+    } catch (e) {
+      ultimo = e;
+      if (!valeOutro(e)) break;
+      console.warn(`IA: ${qual} indisponível, tentando o próximo modelo.`);
+    }
+  }
+  throw ultimo;
 }
 
 /** Traduz os erros da IA para algo que a pessoa entende e sabe o que fazer. */
@@ -117,6 +142,9 @@ function traduzirErro(e: unknown): ErroIA {
   if (/\b429\b/.test(texto) || texto.includes("quota") || texto.includes("resource_exhausted") || texto.includes("rate limit")) {
     return new ErroIA("A IA atingiu o limite gratuito por agora. Tente de novo em alguns minutos.");
   }
+  if (texto.includes("high demand") || texto.includes("overloaded") || /\b(500|503)\b/.test(texto)) {
+    return new ErroIA("A IA do Google está lotada agora. Tente de novo em um minuto.");
+  }
   if (texto.includes("not found") || texto.includes("404")) {
     return new ErroIA(`O modelo ${MODELO} não está disponível. Troque VITE_GEMINI_MODEL na Vercel.`);
   }
@@ -128,7 +156,7 @@ function traduzirErro(e: unknown): ErroIA {
 
 async function pedirJson<T>(nome: string, schema: ReturnType<typeof Schema.object>, partes: (string | { inlineData: { data: string; mimeType: string } })[]): Promise<T> {
   try {
-    const r = await modelo(nome, schema).generateContent(partes);
+    const r = await gerar(nome, schema, partes);
     return JSON.parse(r.response.text()) as T;
   } catch (e) {
     throw traduzirErro(e);
@@ -185,7 +213,7 @@ export function criarGemini(): IA {
 
     async perguntar(pergunta, plano, contexto) {
       try {
-        const r = await modelo("pergunta").generateContent(
+        const r = await gerar("pergunta", undefined,
           `${PROMPT_PERGUNTA}\n\nPLANO:\n${JSON.stringify(plano)}\n\nCONTEXTO:\n${JSON.stringify(contexto)}\n\nPERGUNTA:\n${pergunta}`
         );
         return r.response.text().trim();

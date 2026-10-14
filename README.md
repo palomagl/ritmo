@@ -61,7 +61,7 @@ A marcação automática do hábito de água no Minha Rotina só funciona quando
 2. **App Check** (obrigatório para a IA a partir de 02/11/2026): Console → App Check → registre o app web com **reCAPTCHA v3** (grátis) ou reCAPTCHA Enterprise e cole a chave do site em `VITE_RECAPTCHA_V3_KEY` (ou `VITE_RECAPTCHA_ENTERPRISE_KEY`). Depois, em App Check → APIs → Firebase AI Logic, clique em **Aplicar**.
 3. Para testar no computador com o App Check ligado: rode `npm run dev`, copie o token de depuração que aparece no console do navegador e cadastre em App Check → Apps → Gerenciar tokens de depuração.
 
-O modelo vem de `VITE_GEMINI_MODEL` (padrão `gemini-3.5-flash`). Quando o Google aposentar um modelo, troque a variável na Vercel e publique de novo.
+O modelo vem de `VITE_GEMINI_MODEL` (padrão `gemini-3.5-flash-lite`, com o `gemini-3.5-flash` de reserva). Quando o Google aposentar um modelo, troque a variável na Vercel e publique de novo.
 
 > No nível grátis, o Google pode usar o que é enviado à IA para melhorar os produtos dele. Foto de prato tudo bem; no plano alimentar, apague nome, CPF e contatos; o laudo de bioimpedância dá para digitar em vez de mandar a foto.
 
