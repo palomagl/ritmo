@@ -39,7 +39,24 @@ export interface Perfil {
   habitoAguaId: string | null;
   /** Conexão com o Strava: as corridas de lá entram sozinhas. */
   strava?: ConexaoStrava | null;
+  /** Que lembretes chegam por notificação (valem para todos os aparelhos). */
+  lembretes?: PrefsLembretes;
   boasVindasFeitas: boolean;
+}
+
+export interface PrefsLembretes {
+  agua: boolean;
+  refeicoes: boolean;
+  semana: boolean;
+}
+
+/** Um aparelho inscrito para receber notificações (Web Push). */
+export interface InscricaoAviso {
+  id: string;
+  endpoint: string;
+  keys: { p256dh: string; auth: string };
+  aparelho: string;
+  criadoEm: number;
 }
 
 export interface ConexaoStrava {
@@ -243,5 +260,11 @@ export interface Backend {
   /** Marca o hábito hoje, se ainda não estiver marcado. Devolve se marcou. */
   marcarHabitoRotina(id: string): Promise<boolean>;
   dadosAtalho(): Promise<DadosAtalho | null>;
+
+  // Notificações
+  salvarInscricaoAviso(i: InscricaoAviso): Promise<void>;
+  excluirInscricaoAviso(id: string): Promise<void>;
+  /** Token de acesso de agora (para o servidor saber quem pede). */
+  tokenDeAcesso(): Promise<string | null>;
   exportarTudo(): Promise<unknown>;
 }

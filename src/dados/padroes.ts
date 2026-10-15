@@ -29,6 +29,7 @@ export const PERFIL_PADRAO: Perfil = {
   dormeH: 22,
   anelComida: "kcal",
   habitoAguaId: null,
+  lembretes: { agua: true, refeicoes: true, semana: true },
   boasVindasFeitas: false,
 };
 
@@ -43,5 +44,6 @@ export function completarPerfil(guardado: Partial<Perfil> | undefined, nome: str
     metas: { ...METAS_PADRAO, ...(g.metas ?? {}) },
     copos: g.copos?.length ? g.copos : PERFIL_PADRAO.copos,
     pontosDeAtencao: g.pontosDeAtencao ?? [],
+    lembretes: { ...PERFIL_PADRAO.lembretes!, ...(g.lembretes ?? {}) },
   };
 }

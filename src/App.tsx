@@ -3,6 +3,7 @@ import { EstadoProvider, AvisosProvider, useEstado } from "@/app/estado";
 import { casar, navegar, useCaminho } from "@/app/rota";
 import { ERRO_CONFIG, MODO_DEMO } from "@/dados";
 import { sincronizarStrava } from "@/lib/strava";
+import { manterAvisos } from "@/lib/avisos";
 import { BarraInferior } from "@/componentes/BarraInferior";
 import { Marca } from "@/componentes/Icone";
 import { Esqueleto } from "@/componentes/basicos";
@@ -23,6 +24,7 @@ const Agua = lazy(() => import("@/telas/Agua"));
 const Corpo = lazy(() => import("@/telas/Corpo"));
 const Perfil = lazy(() => import("@/telas/Perfil"));
 const StravaRetorno = lazy(() => import("@/telas/StravaRetorno"));
+const Semana = lazy(() => import("@/telas/Semana"));
 
 /** Tela de espera: a marca no meio, sem piscar conteúdo pela metade. */
 function Abertura() {
@@ -59,6 +61,7 @@ const ROTAS: { padrao: string; tela: (p: Record<string, string>) => ReactNode; s
   { padrao: "/agua", tela: () => <Agua /> },
   { padrao: "/corpo", tela: () => <Corpo /> },
   { padrao: "/perfil", tela: () => <Perfil /> },
+  { padrao: "/semana", tela: () => <Semana /> },
   { padrao: "/strava", tela: () => <StravaRetorno />, semBarra: true },
 ];
 
@@ -85,6 +88,22 @@ function Conteudo() {
     return () => document.removeEventListener("visibilitychange", aoVoltar);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [temStrava]);
+  // Notificações: o toque numa notificação com o app aberto troca de tela, e
+  // a inscrição deste aparelho é conferida a cada login.
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    const aoReceber = (e: MessageEvent) => {
+      const d = e.data as { tipo?: string; caminho?: string } | null;
+      if (d?.tipo === "abrir" && d.caminho) navegar(d.caminho);
+    };
+    navigator.serviceWorker.addEventListener("message", aoReceber);
+    return () => navigator.serviceWorker.removeEventListener("message", aoReceber);
+  }, []);
+  const uid = usuario?.uid;
+  useEffect(() => {
+    if (uid) void manterAvisos().catch((e) => console.warn("Notificações:", e));
+  }, [uid]);
+
   useEffect(() => {
     if (caminho === "/mover") navegar("/mover/passos", { substituir: true });
     else if (!conhecido) navegar("/", { substituir: true });

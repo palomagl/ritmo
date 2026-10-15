@@ -400,6 +400,19 @@ export function criarFirestore(): Backend {
       return { projeto: fb.config.projectId, chave: fb.config.apiKey, uid: u.uid, token: u.refreshToken };
     },
 
+    salvarInscricaoAviso(i) {
+      const { id, ...resto } = i;
+      return semEsperar(setDoc(ref("pulsoAvisos", id), limpo(resto)), "notificações");
+    },
+
+    excluirInscricaoAviso(id) {
+      return semEsperar(deleteDoc(ref("pulsoAvisos", id)), "desligar notificações");
+    },
+
+    async tokenDeAcesso() {
+      return (await fb.auth.currentUser?.getIdToken()) ?? null;
+    },
+
     async exportarTudo() {
       const nomes = ["pulsoDias", "pulsoRefeicoes", "pulsoPlano", "pulsoFavoritos", "pulsoCorridas", "pulsoMedidas"];
       const perfil = (await getDoc(perfilRef())).data()?.pulso ?? null;

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { dados, MODO_DEMO, type DadosAtalho, type HabitoRotina, type Metas, type Tema } from "@/dados";
+import { dados, MODO_DEMO, type DadosAtalho, type HabitoRotina, type Metas, type PrefsLembretes, type Tema } from "@/dados";
 import { useAvisos, useEstado } from "@/app/estado";
 import { Folha, Topo } from "@/componentes/basicos";
 import { Icone } from "@/componentes/Icone";
+import { Link } from "@/app/rota";
 import { conectarStrava, desconectarStrava, sincronizarStrava } from "@/lib/strava";
+import { ativarAvisos, desativarAvisos, situacaoAvisos, testarAviso, type SituacaoAvisos } from "@/lib/avisos";
 import { formatarMl } from "@/lib/agua";
 import { milhar } from "@/lib/passos";
 
@@ -96,6 +98,19 @@ export default function Perfil() {
           </div>
         </div>
       </section>
+
+      <p className="rotulo-secao">Lembretes</p>
+      <CartaoLembretes />
+
+      <Link para="/semana" className="card card-toque linha cor-pulso" style={{ marginTop: 12 }}>
+        <span className="selo-icone"><Icone nome="grafico" tamanho={18} /></span>
+        <span className="cresce">
+          <b>Resumo da semana</b>
+          <br />
+          <span className="legenda">Peso, passos, calorias e o que dá pra ajustar</span>
+        </span>
+        <Icone nome="seta" tamanho={18} className="suave" />
+      </Link>
 
       <p className="rotulo-secao">Integrações</p>
       <button className="card card-toque linha cor-passos" onClick={() => setAtalho(true)}>
@@ -239,6 +254,111 @@ function EditarMetas({
         </button>
       </div>
     </Folha>
+  );
+}
+
+const TIPOS_LEMBRETE: { chave: keyof PrefsLembretes; nome: string; quando: string }[] = [
+  { chave: "agua", nome: "Água", quando: "Quando ficar atrás do ritmo, no máximo a cada 2 h" },
+  { chave: "refeicoes", nome: "Refeições do plano", quando: "No horário de cada uma, se ainda não registrou" },
+  { chave: "semana", nome: "Resumo da semana", quando: "Domingo à noite" },
+];
+
+/** Notificações de água, refeição e resumo da semana, mesmo com o app fechado. */
+function CartaoLembretes() {
+  const { perfil } = useEstado();
+  const avisar = useAvisos();
+  const [situacao, setSituacao] = useState<SituacaoAvisos | null>(null);
+  const [ocupado, setOcupado] = useState(false);
+
+  useEffect(() => {
+    void situacaoAvisos().then(setSituacao, () => setSituacao("sem-suporte"));
+  }, []);
+
+  if (!perfil) return null;
+  const prefs = perfil.lembretes ?? { agua: true, refeicoes: true, semana: true };
+
+  const fazer = async (acao: () => Promise<void>) => {
+    setOcupado(true);
+    try {
+      await acao();
+    } catch (e) {
+      avisar((e as Error).message);
+    } finally {
+      setOcupado(false);
+      setSituacao(await situacaoAvisos().catch(() => "sem-suporte" as const));
+    }
+  };
+
+  const ativar = () =>
+    fazer(async () => {
+      await ativarAvisos();
+      avisar("Notificações ativadas");
+    });
+  const desligar = () =>
+    fazer(async () => {
+      await desativarAvisos();
+      avisar("Notificações desligadas neste aparelho");
+    });
+  const testar = () =>
+    fazer(async () => {
+      await testarAviso();
+      avisar("Teste enviado: deve chegar em segundos");
+    });
+
+  const textos: Record<SituacaoAvisos, string> = {
+    demo: "No modo demonstração as notificações ficam desligadas.",
+    "sem-suporte": "Este navegador não recebe notificações. No iPhone, use o ritmo instalado na Tela de Início.",
+    instalar: "No iPhone, as notificações só funcionam com o ritmo instalado: no Safari, toque em Compartilhar → Adicionar à Tela de Início e abra por lá.",
+    bloqueado: "As notificações estão bloqueadas. Libere em Ajustes → Notificações → ritmo e volte aqui.",
+    desligado: "Lembretes de água, das refeições do plano e o resumo da semana, mesmo com o app fechado.",
+    ligado: "Ativas neste aparelho. Escolha o que quer receber:",
+  };
+
+  return (
+    <section className="card cor-pulso">
+      <div className="card-cabeca">
+        <span className="selo-icone"><Icone nome="sino" tamanho={18} /></span>
+        <div className="cresce">
+          <b>Notificações</b>
+          <p className="legenda" style={{ margin: 0 }}>{situacao ? textos[situacao] : "Verificando…"}</p>
+        </div>
+      </div>
+      {situacao === "ligado" && (
+        <>
+          <div className="lista-chaves">
+            {TIPOS_LEMBRETE.map((t) => (
+              <label key={t.chave} className="linha-chave">
+                <span className="cresce">
+                  <b>{t.nome}</b>
+                  <br />
+                  <span className="legenda">{t.quando}</span>
+                </span>
+                <input
+                  type="checkbox"
+                  className="chave"
+                  role="switch"
+                  checked={prefs[t.chave]}
+                  onChange={(e) => dados.salvarPerfil({ lembretes: { ...prefs, [t.chave]: e.target.checked } })}
+                />
+              </label>
+            ))}
+          </div>
+          <div className="grade-2" style={{ marginTop: 12 }}>
+            <button className="botao secundario" onClick={testar} disabled={ocupado}>
+              <Icone nome="sino" tamanho={18} /> Enviar teste
+            </button>
+            <button className="botao texto" onClick={desligar} disabled={ocupado}>
+              Desligar aqui
+            </button>
+          </div>
+        </>
+      )}
+      {situacao === "desligado" && (
+        <button className="botao cheio" onClick={ativar} disabled={ocupado}>
+          <Icone nome="sino" tamanho={18} /> {ocupado ? "Ativando…" : "Ativar notificações"}
+        </button>
+      )}
+    </section>
   );
 }
 
