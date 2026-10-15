@@ -256,6 +256,7 @@ export function criarFirestore(): Backend {
     excluirRefeicao(r) {
       const lote = writeBatch(db());
       lote.delete(ref("pulsoRefeicoes", r.id));
+      lote.delete(ref("pulsoFotos", r.id));
       lote.set(
         ref("pulsoDias", r.data),
         {
@@ -267,6 +268,21 @@ export function criarFirestore(): Backend {
         { merge: true }
       );
       return semEsperar(lote.commit(), "excluir refeição");
+    },
+
+    // A foto boa fica num documento só dela: a lista de refeições continua
+    // leve (só a miniatura) e a foto grande só é lida quando alguém abre.
+    salvarFotoRefeicao(id, base64) {
+      return semEsperar(setDoc(ref("pulsoFotos", id), { base64, em: Date.now() }), "foto do prato");
+    },
+
+    async obterFotoRefeicao(id) {
+      try {
+        const snap = await getDoc(ref("pulsoFotos", id));
+        return (snap.data()?.base64 as string | undefined) ?? null;
+      } catch {
+        return null;
+      }
     },
 
     // ------------------------------------------

@@ -234,6 +234,9 @@ export interface Backend {
   observarRefeicoes(data: string, cb: (r: Refeicao[]) => void): Cancelar;
   salvarRefeicao(r: Omit<Refeicao, "id">): Promise<string>;
   excluirRefeicao(r: Refeicao): Promise<void>;
+  /** A foto do prato em tamanho bom (JPEG base64), guardada à parte da refeição. */
+  salvarFotoRefeicao(id: string, base64: string): Promise<void>;
+  obterFotoRefeicao(id: string): Promise<string | null>;
 
   // Plano alimentar
   observarPlano(cb: (p: Plano | null) => void): Cancelar;

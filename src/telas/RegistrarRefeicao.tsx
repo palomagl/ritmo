@@ -14,7 +14,7 @@ import { navegar, voltar } from "@/app/rota";
 import { Esqueleto, Folha, PassoNumero, Topo } from "@/componentes/basicos";
 import { Icone } from "@/componentes/Icone";
 import { ROTULO_COMPARACAO } from "./Comer";
-import { filaFotos, reduzirParaBase64 } from "@/lib/aparelho";
+import { base64ParaArquivo, filaFotos, reduzirParaBase64 } from "@/lib/aparelho";
 import { dec, mudarPorcao, NOMES_REFEICAO, ORDEM_REFEICOES, refeicaoDoPlano, refeicaoPelaHora, somarItens } from "@/lib/nutricao";
 
 type Etapa = "escolher" | "foto" | "analisando" | "revisar" | "erro";
@@ -113,7 +113,7 @@ export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) 
   const salvar = async () => {
     if (!analise || itens.length === 0) return;
     setSalvando(true);
-    await dados.salvarRefeicao({
+    const novaId = await dados.salvarRefeicao({
       data: hoje,
       em: Date.now(),
       tipo,
@@ -125,6 +125,11 @@ export default function RegistrarRefeicao({ modo }: { modo: "foto" | "texto" }) 
       comparacaoPlano: analise.comparacaoPlano,
       dica: analise.dica || null,
     });
+    // A foto em tamanho bom fica guardada para ver e salvar no aparelho depois.
+    if (foto) {
+      const boa = await reduzirParaBase64(base64ParaArquivo(foto.base64, "prato.jpg"), 1280, 0.8).catch(() => foto.base64);
+      await dados.salvarFotoRefeicao(novaId, boa);
+    }
     if (foto?.pendenteId) await filaFotos.remover(foto.pendenteId);
     navigator.vibrate?.(20);
     avisar(`${NOMES_REFEICAO[tipo]} registrado`);

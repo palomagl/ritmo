@@ -7,7 +7,7 @@ import { Icone } from "@/componentes/Icone";
 import { dataCurta, chaveDia, horaMinuto } from "@/lib/datas";
 import { milhar } from "@/lib/passos";
 import { dec, NOMES_REFEICAO, refeicaoPelaHora } from "@/lib/nutricao";
-import { filaFotos, type FotoPendente } from "@/lib/aparelho";
+import { filaFotos, salvarFoto, type FotoPendente } from "@/lib/aparelho";
 
 export const ROTULO_COMPARACAO: Record<string, { texto: string; classe: string }> = {
   dentro: { texto: "Dentro do plano", classe: "bom" },
@@ -27,6 +27,19 @@ export default function Comer() {
   useEffect(() => {
     void filaFotos.listar().then(setPendentes);
   }, []);
+
+  // A foto grande da refeição aberta (só a miniatura vem com a lista).
+  // undefined = ainda buscando; null = não existe (refeição antiga ou sem foto).
+  const [fotoGrande, setFotoGrande] = useState<string | null | undefined>(undefined);
+  useEffect(() => {
+    setFotoGrande(undefined);
+    if (!aberta || aberta.origem !== "foto") return;
+    let vivo = true;
+    void dados.obterFotoRefeicao(aberta.id).then((f) => vivo && setFotoGrande(f));
+    return () => {
+      vivo = false;
+    };
+  }, [aberta]);
 
   // Nome do prato frequente sendo digitado (null = campo fechado).
   const [nomeFavorito, setNomeFavorito] = useState<string | null>(null);
@@ -167,7 +180,25 @@ export default function Comer() {
       <Folha aberta={aberta !== null} aoFechar={() => { setAberta(null); setNomeFavorito(null); }} titulo={aberta ? `${NOMES_REFEICAO[aberta.tipo]} · ${horaMinuto(aberta.em)}` : ""}>
         {aberta && (
           <div className="pilha">
-            {aberta.miniatura && <img className="foto-previa" src={`data:image/jpeg;base64,${aberta.miniatura}`} alt="Foto do prato" />}
+            {(fotoGrande || aberta.miniatura) && (
+              <>
+                <img className="foto-previa" src={`data:image/jpeg;base64,${fotoGrande ?? aberta.miniatura}`} alt="Foto do prato" />
+                <button
+                  className="botao secundario cheio"
+                  onClick={async () => {
+                    const nome = `ritmo-${aberta.data}-${NOMES_REFEICAO[aberta.tipo].toLowerCase().replace(/\s+/g, "-")}.jpg`;
+                    const ok = await salvarFoto(fotoGrande ?? aberta.miniatura!, nome);
+                    // No celular o próprio menu de compartilhar já confirma.
+                    if (ok && !/iPhone|iPad|Android/i.test(navigator.userAgent)) avisar("Foto baixada");
+                  }}
+                >
+                  <Icone nome="baixar" tamanho={18} /> Salvar foto no aparelho
+                </button>
+                {fotoGrande === null && aberta.origem === "foto" && (
+                  <p className="legenda" style={{ margin: 0 }}>Esta refeição é de antes da foto em tamanho bom: dá para salvar, mas ela sai pequena.</p>
+                )}
+              </>
+            )}
             <div className="linha" style={{ flexWrap: "wrap", gap: 8 }}>
               {aberta.comparacaoPlano && <span className={`pilula ${ROTULO_COMPARACAO[aberta.comparacaoPlano].classe}`}>{ROTULO_COMPARACAO[aberta.comparacaoPlano].texto}</span>}
               {aberta.confianca && <span className="pilula">Confiança {aberta.confianca === "media" ? "média" : aberta.confianca}</span>}

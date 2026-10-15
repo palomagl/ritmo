@@ -40,6 +40,8 @@ export interface Banco {
 const CHAVE = "pulso:demo:v1";
 const USUARIO: Usuario = { uid: "demo", nome: "Paloma", email: "paloma@exemplo.com", foto: null };
 
+const fotosDemo = new Map<string, string>();
+
 export const id = () => Math.random().toString(36).slice(2, 10);
 
 /** Uma volta no Parque da Redenção, em Porto Alegre, para a corrida de exemplo. */
@@ -308,7 +310,13 @@ export function criarLocal(opcoes: {
       salvar();
       return nova.id;
     },
+    // Fotos do modo demonstração ficam só na memória: não lotam o navegador.
+    async salvarFotoRefeicao(fid, base64) {
+      fotosDemo.set(fid, base64);
+    },
+    obterFotoRefeicao: async (fid) => fotosDemo.get(fid) ?? null,
     async excluirRefeicao(r) {
+      fotosDemo.delete(r.id);
       banco.refeicoes = banco.refeicoes.filter((x) => x.id !== r.id);
       const d = dia(r.data);
       d.kcal = (d.kcal ?? 0) - r.totais.kcal;

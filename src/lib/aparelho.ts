@@ -38,6 +38,40 @@ async function carregarImagem(arquivo: Blob): Promise<CanvasImageSource & { widt
   });
 }
 
+/** JPEG em base64 de volta para arquivo. */
+export function base64ParaArquivo(base64: string, nome: string): File {
+  const bin = atob(base64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new File([bytes], nome, { type: "image/jpeg" });
+}
+
+/**
+ * Salva uma foto no aparelho. No iPhone abre o menu de compartilhar, que tem
+ * "Salvar Imagem" (vai para o app Fotos); no computador, baixa o arquivo.
+ * Devolve false se a pessoa fechou o menu sem escolher nada.
+ */
+export async function salvarFoto(base64: string, nome: string): Promise<boolean> {
+  const arquivo = base64ParaArquivo(base64, nome);
+  const nav = navigator as Navigator & { canShare?: (d: { files: File[] }) => boolean };
+  if (nav.canShare?.({ files: [arquivo] }) && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+    try {
+      await navigator.share({ files: [arquivo] });
+      return true;
+    } catch (e) {
+      if ((e as Error).name === "AbortError") return false;
+      /* sem compartilhar: cai no download abaixo */
+    }
+  }
+  const url = URL.createObjectURL(arquivo);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nome;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  return true;
+}
+
 /** Lê um arquivo inteiro como base64 (para PDF do plano). */
 export function arquivoParaBase64(arquivo: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
