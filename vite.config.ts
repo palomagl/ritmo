@@ -43,6 +43,8 @@ export default defineConfig({
         // esta exceção o service worker devolve o index.html e o login por
         // redirect, que é o caminho do iPhone, nunca termina.
         navigateFallbackDenylist: [/^\/api\//, /^\/__\/auth\//],
+        // Notificações (push e toque na notificação) moram num arquivo à parte.
+        importScripts: ["/sw-avisos.js"],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,

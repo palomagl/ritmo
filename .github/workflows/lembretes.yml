@@ -1,0 +1,28 @@
+# Lembretes do ritmo: a cada 30 minutos, das 6h às 23h30 (horário de Brasília),
+# chama /api/lembretes, que decide se alguém precisa de um aviso agora.
+# O plano grátis da Vercel só agenda uma vez por dia; o GitHub Actions resolve.
+#
+# Opcional: o segredo CRON_SECRET (Settings → Secrets and variables → Actions)
+# igual ao CRON_SECRET da Vercel, para só este agendador poder chamar a rota.
+# Para outro domínio, crie a variável RITMO_URL no mesmo lugar.
+
+name: Lembretes
+
+on:
+  schedule:
+    - cron: "*/30 9-23,0-2 * * *"
+  workflow_dispatch:
+
+jobs:
+  enviar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Rodada de lembretes
+        env:
+          URL: ${{ vars.RITMO_URL || 'https://ritmo-tau-inky.vercel.app' }}
+          SEGREDO: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -fsS --max-time 60 -X POST "$URL/api/lembretes?acao=enviar" \
+            -H "authorization: Bearer $SEGREDO"
+          echo
