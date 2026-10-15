@@ -36,6 +36,8 @@ O **ritmo** junta tudo numa tela só e tira o trabalho do caminho:
 - **As corridas vêm do Strava**: corra com a tela bloqueada ou com o relógio, e o trajeto, o pace e as parciais aparecem no ritmo.
 - **Água em um toque**, com o ritmo do dia: o app sabe se você está atrasada para a meta, e quanto.
 - **Corpo com contexto**: peso, gordura, músculo e água corporal com gráfico, e uma balança para anotar o peso em segundos.
+- **Lembretes que entendem o seu dia**: notificação de água só quando você está atrás do ritmo, da refeição do plano no horário (se ainda não registrou) e o resumo no domingo à noite.
+- **Resumo da semana**: peso, média de passos, dias dentro das calorias, água e o que dá para ajustar, com dicas da IA baseadas no seu plano.
 
 Tudo isso com a cara de um app nativo: instala na tela inicial do iPhone, abre em tela cheia e funciona offline.
 
@@ -69,6 +71,17 @@ O painel do dia. A **linha do tempo** mostra do acordar ao dormir, com um ponto 
 ### Água
 Copos personalizados, desfazer, histórico de 7 e 30 dias e sequência de dias na meta.
 
+### Lembretes
+Notificações de verdade no iPhone (com o ritmo instalado na Tela de Início) e no computador, mesmo com o app fechado:
+- **Água**: só quando você está atrás do ritmo do dia, no máximo a cada 2 horas, e nunca logo depois de um copo.
+- **Refeições do plano**: no horário de cada uma, com a opção do plano, se ainda não foi registrada.
+- **Resumo da semana**: domingo à noite.
+
+Nada antes de acordar nem depois de dormir, e cada tipo liga e desliga no Perfil.
+
+### Resumo da semana
+Segunda a domingo numa tela: peso e variação, média de passos, quantos dias ficaram dentro das calorias (e quais passaram), proteína média, água e corridas. Logo abaixo, o que foi bem, o que dá para ajustar e, se quiser, dicas da IA para a próxima semana.
+
 ## Design
 
 Vidro fosco sobre luz azul difusa, tipografia Inter, azul e azul-violeta como marca e uma cor por área (verde para passos, azul para água, laranja para comida, violeta para o corpo).
@@ -96,13 +109,14 @@ Vidro fosco sobre luz azul difusa, tipografia Inter, azul e azul-violeta como ma
 | Proteção | App Check com Fraud Defense (reCAPTCHA Enterprise) |
 | Passos | Atalho do iPhone → função serverless `/api/passos` |
 | Corridas | Strava API (OAuth) → função serverless `/api/strava` |
+| Lembretes | Web Push (VAPID) pela função `/api/lembretes`, com Firebase Admin; GitHub Actions chama a cada 30 min |
 | Mapa | Leaflet + OpenStreetMap, com desenho em SVG quando não há internet |
 | Hospedagem | Vercel |
 
-As contas (distância por Haversine, filtro de GPS, parciais, ritmo da água, sequências, porções, pontos de atenção e o lembrete do dia) são funções puras em `src/lib`, cada uma com teste.
+As contas (distância por Haversine, filtro de GPS, parciais, ritmo da água, sequências, porções, pontos de atenção, o lembrete do dia, o resumo da semana e quando mandar cada notificação) são funções puras em `src/lib`, cada uma com teste.
 
 ```
-api/            funções que recebem os passos do Atalho e buscam as corridas do Strava
+api/            passos do Atalho, corridas do Strava e os lembretes (com teste)
 src/
   app/          estado global, rotas e ações compartilhadas
   componentes/  linha do dia, balança, gráficos, mapa, navegação, ícones
@@ -151,20 +165,26 @@ Importe o repositório (framework **Vite**) e cadastre as variáveis do `.env.ex
 | `VITE_RECAPTCHA_ENTERPRISE_KEY` | A chave de site usada no App Check |
 | `VITE_GEMINI_MODEL` | Opcional. Padrão `gemini-3.5-flash-lite`, com `gemini-3.5-flash` de reserva |
 | `STRAVA_CLIENT_ID` e `STRAVA_CLIENT_SECRET` | Do app criado em strava.com/settings/api (só no servidor) |
+| `FIREBASE_SERVICE_ACCOUNT` | O JSON da conta de serviço do Firebase, para os lembretes (só no servidor) |
+| `CRON_SECRET` | Opcional. Se definir, use o mesmo valor no segredo do GitHub Actions |
 
 O `vercel.json` encaminha `/__/auth` para o `firebaseapp.com` do projeto. Se trocar de projeto Firebase, troque ali também.
 
 ### Strava
 Em **strava.com/settings/api**, crie um app com o domínio da Vercel em *Authorization Callback Domain*. Cadastre o Client ID e o Client Secret na Vercel e, no ritmo, toque em **Perfil → Strava → Conectar**.
 
+### Lembretes
+1. No Firebase, **Configurações do projeto → Contas de serviço → Gerar nova chave privada**. Abra o arquivo baixado e cole o conteúdo inteiro em `FIREBASE_SERVICE_ACCOUNT` na Vercel. As chaves das notificações saem dele, sem mais nada para gerar.
+2. O agendador já vem no repositório (`.github/workflows/lembretes.yml`): o GitHub Actions chama `/api/lembretes` a cada 30 minutos, das 6h às 23h30. Confira em **Actions** que o workflow "Lembretes" está ativo (dá para rodar na mão em *Run workflow*).
+3. No iPhone, abra o ritmo instalado na Tela de Início, vá em **Perfil → Lembretes → Ativar notificações** e toque em **Enviar teste**.
+
 ### Passos do iPhone
 No app, **Perfil → Passos do iPhone** mostra o endereço e o token para copiar. O Atalho tem só três ações: *Localizar Amostras de Saúde* (Passos, hoje), *Calcular Estatísticas* (Soma) e *Obter Conteúdo do URL* (POST, JSON com `passos` e `token`). Uma automação por horário faz o resto.
 
 ## Próximos passos
 
-- Lembretes de água e de refeição por notificação.
-- Resumo semanal com o que melhorou e o que vale ajustar.
-- Compartilhar o progresso com a nutricionista.
+- Compartilhar o progresso com a nutricionista (o resumo da semana em PDF para a consulta).
+- Lembrete de pesagem semanal e de passos no fim da tarde.
 - Planos para mais de uma pessoa (hoje o app é pessoal).
 
 ---
