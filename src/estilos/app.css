@@ -429,6 +429,10 @@ a {
 .card-toque:active {
   transform: scale(0.985);
 }
+/* Cartão tocável em linha (ícone, texto, seta): o display:block acima não vale. */
+.card-toque.linha {
+  display: flex;
+}
 .card-cabeca {
   display: flex;
   align-items: center;
@@ -912,6 +916,217 @@ a {
 .pilula.atencao {
   background: color-mix(in srgb, var(--comida) 18%, transparent);
   color: color-mix(in srgb, var(--comida) 70%, var(--texto));
+}
+
+/* ---------- Chaves liga/desliga (lembretes) ---------- */
+.lista-chaves {
+  display: grid;
+  margin: 2px 0 0;
+}
+.linha-chave {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  cursor: pointer;
+}
+.linha-chave + .linha-chave {
+  border-top: 1px solid var(--linha);
+}
+.chave {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  width: 50px;
+  height: 30px;
+  margin: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--texto-suave) 28%, transparent);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.chave::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 6px rgb(15 23 42 / 0.25);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.chave:checked {
+  background: var(--marca-grad);
+}
+.chave:checked::after {
+  transform: translateX(20px);
+}
+.chave:focus-visible {
+  outline: 2px solid var(--pulso);
+  outline-offset: 2px;
+}
+
+/* ---------- Resumo da semana ---------- */
+.semana-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: -6px;
+}
+.semana-nav .botao-icone:disabled {
+  opacity: 0.35;
+}
+.semana-nav-nome {
+  flex: 1;
+  display: grid;
+  text-align: center;
+  font-size: 17px;
+}
+.semana-numeros {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.semana-numero {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  align-content: start;
+}
+.semana-numero .legenda {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+}
+.semana-numero-valor {
+  font-family: var(--display);
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-top: 4px;
+}
+.semana-dias {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  text-align: center;
+}
+.semana-dia {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+.semana-dia-bola {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 15px;
+  color: #fff;
+  background: var(--card-2);
+  box-shadow: inset 0 0 0 1.5px var(--linha);
+}
+.semana-dia-kcal {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+.dia-dentro .semana-dia-bola,
+.semana-legenda .dia-dentro,
+.semana-mini .dia-dentro {
+  background: var(--passos);
+  box-shadow: none;
+}
+.dia-acima .semana-dia-bola,
+.semana-legenda .dia-acima,
+.semana-mini .dia-acima {
+  background: var(--comida);
+  box-shadow: none;
+}
+.dia-pouco .semana-dia-bola,
+.semana-legenda .dia-pouco,
+.semana-mini .dia-pouco {
+  background: color-mix(in srgb, var(--texto-suave) 40%, transparent);
+  box-shadow: none;
+}
+.dia-hoje .semana-dia-bola,
+.semana-mini .dia-hoje {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--pulso);
+}
+.dia-futuro .semana-dia-bola,
+.semana-mini .dia-futuro {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--linha);
+}
+.semana-legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--texto-suave);
+}
+.semana-legenda span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.semana-legenda i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.semana-graficos {
+  display: grid;
+  gap: 12px;
+}
+.observacao {
+  align-items: center;
+  padding: 14px 16px;
+  line-height: 21px;
+}
+.observacao .selo-icone {
+  width: 36px;
+  height: 36px;
+}
+.dicas-lista {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  display: grid;
+  gap: 8px;
+  line-height: 22px;
+}
+.dicas-ia .botao {
+  width: 100%;
+  white-space: normal;
+}
+.dicas-lista li::marker {
+  color: var(--pulso);
+}
+.cartao-semana {
+  display: grid;
+  gap: 14px;
+}
+.semana-mini {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+.semana-mini i {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--card-2);
+}
+.semana-mini .dia-vazio {
+  background: color-mix(in srgb, var(--texto-suave) 16%, transparent);
 }
 
 /* ---------- Barras de macro ---------- */
@@ -1723,7 +1938,7 @@ textarea.entrada {
       "hero agua"
       "hero balanca"
       "lembrete proxima"
-      "corrida proxima";
+      "corrida semana";
     gap: 20px 22px;
     align-items: start;
   }
@@ -1737,6 +1952,9 @@ textarea.entrada {
   .area-balanca { grid-area: balanca; }
   .area-proxima { grid-area: proxima; }
   .area-corrida { grid-area: corrida; }
+  .area-semana { grid-area: semana; }
+  .semana-numeros { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .semana-graficos { grid-template-columns: 1fr 1fr; gap: 16px; }
   .hoje .rotulo-secao {
     margin-top: 0;
   }
@@ -1863,7 +2081,8 @@ textarea.entrada {
       "topo topo topo"
       "hero agua agua"
       "hero lembrete balanca"
-      "proxima proxima corrida";
+      "proxima proxima corrida"
+      "semana semana corrida";
     gap: 24px;
   }
   .hoje .saudacao {

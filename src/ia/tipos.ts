@@ -46,6 +46,8 @@ export interface IA {
   lerPlano(arquivos: Arquivo[]): Promise<Omit<Plano, "atualizadoEm">>;
   lerLaudo(arquivo: Arquivo): Promise<LeituraLaudo>;
   perguntar(pergunta: string, plano: Plano | null, contexto: Omit<ContextoRefeicao, "tipoRefeicao" | "refeicaoDoPlano">): Promise<string>;
+  /** Dicas para a próxima semana a partir dos números da semana (texto pronto). */
+  analisarSemana(numeros: string, plano: Plano | null, pontosDeAtencao: string[]): Promise<string[]>;
 }
 
 /** Erro com uma mensagem que já pode ir para a tela. */

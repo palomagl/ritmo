@@ -14,6 +14,7 @@ import { milhar } from "@/lib/passos";
 import { fracao, NOMES_REFEICAO, proximaRefeicao } from "@/lib/nutricao";
 import { insightDoDia } from "@/lib/insights";
 import { decodificarRota, formatarDuracao, formatarKm, formatarPace } from "@/lib/corrida";
+import { nomeDaSemana, resumoDaSemana, semanaPadrao } from "@/lib/semana";
 
 export default function Hoje() {
   const { perfil, dia, plano, hoje, usuario } = useEstado();
@@ -25,6 +26,11 @@ export default function Hoje() {
   const medidas = useObservar<Medida[]>((cb) => dados.observarMedidas(cb), []);
   const ultima = corridas?.[0];
   const rotaUltima = useMemo(() => (ultima ? decodificarRota(ultima.rota) : []), [ultima]);
+  const semana = useMemo(() => {
+    if (!perfil || !dias || !medidas || !corridas) return null;
+    const segunda = semanaPadrao(hoje, agoraH);
+    return resumoDaSemana({ segunda, hoje, agoraH, dias, metas: perfil.metas, medidas, corridas });
+  }, [perfil, dias, medidas, corridas, hoje, agoraH]);
   const eventos = useMemo<EventoDia[]>(() => {
     const hora = (ms: number) => {
       const d = new Date(ms);
@@ -231,6 +237,32 @@ export default function Hoje() {
         </Link>
       )}
       </div>
+
+      {semana && (
+        <div className="area-semana">
+          <p className="rotulo-secao">Sua semana</p>
+          <Link para="/semana" className="card card-toque cor-pulso cartao-semana">
+            <div className="linha">
+              <span className="selo-icone"><Icone nome="grafico" tamanho={18} /></span>
+              <span className="cresce">
+                <b>{nomeDaSemana(semana.segunda)}</b>
+                <br />
+                <span className="legenda">
+                  {semana.fechados === 0
+                    ? "A semana começou agora: os números aparecem a partir de amanhã."
+                    : `${semana.comida.diasDentro} de ${semana.fechados} dias no plano · ${milhar(semana.passos.media)} passos/dia`}
+                </span>
+              </span>
+              <Icone nome="seta" tamanho={18} className="suave" />
+            </div>
+            <div className="semana-mini" aria-hidden="true">
+              {semana.comida.porDia.map((p, i) => (
+                <i key={semana.dias[i]} className={`dia-${p}`} />
+              ))}
+            </div>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

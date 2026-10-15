@@ -11,7 +11,7 @@ import { getAI, getGenerativeModel, GoogleAIBackend, Schema, type GenerativeMode
 import { firebase } from "@/dados/firebase";
 import { normalizarItens, ORDEM_REFEICOES } from "@/lib/nutricao";
 import type { Plano, RefeicaoPlano, TipoRefeicao } from "@/dados/tipos";
-import { PROMPT_LAUDO, PROMPT_PERGUNTA, PROMPT_PLANO, PROMPT_PRATO, PROMPT_TEXTO, textoExtrasPrato } from "./prompts";
+import { PROMPT_LAUDO, PROMPT_PERGUNTA, PROMPT_PLANO, PROMPT_PRATO, PROMPT_SEMANA, PROMPT_TEXTO, textoExtrasPrato } from "./prompts";
 import { ErroIA, type AnalisePrato, type IA, type LeituraLaudo } from "./tipos";
 
 const MODELO = (import.meta.env.VITE_GEMINI_MODEL as string | undefined) || "gemini-3.5-flash-lite";
@@ -93,6 +93,10 @@ const esquemaLaudo = Schema.object({
     cinturaCm: Schema.number(),
   },
   optionalProperties: ["data", "pesoKg", "gorduraPct", "musculoPct", "aguaPct", "cinturaCm"],
+});
+
+const esquemaSemana = Schema.object({
+  properties: { dicas: Schema.array({ items: Schema.string() }) },
 });
 
 // ----------------------------------------------
@@ -234,6 +238,13 @@ export function criarGemini(): IA {
       } catch (e) {
         throw traduzirErro(e);
       }
+    },
+
+    async analisarSemana(numeros, plano, pontosDeAtencao) {
+      const bruto = await pedirJson<{ dicas?: string[] }>("semana", esquemaSemana, [
+        `${PROMPT_SEMANA}\n\nNÚMEROS DA SEMANA:\n${numeros}\n\nPLANO:\n${JSON.stringify(plano)}\n\nPONTOS DE ATENÇÃO:\n${JSON.stringify(pontosDeAtencao)}`,
+      ]);
+      return (bruto.dicas ?? []).map((d) => d.trim()).filter(Boolean).slice(0, 3);
     },
   };
 }

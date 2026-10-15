@@ -69,5 +69,14 @@ export function criarIADemo(): IA {
       }
       return "Pelo seu plano, vale manter as porções e priorizar a proteína nessa refeição. Se for uma mudança frequente, confirme com a sua nutricionista.";
     },
+
+    async analisarSemana() {
+      await espera(1200);
+      return [
+        "Nos dias que passaram das calorias, o lanche da tarde foi o maior: troque por iogurte natural com fruta, como está no plano.",
+        "Comece o dia com 500 ml de água logo ao acordar: é a forma mais fácil de chegar à meta antes do almoço.",
+        "Mantenha as caminhadas depois do almoço: foram os dias com mais passos da semana.",
+      ];
+    },
   };
 }
