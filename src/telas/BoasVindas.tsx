@@ -3,6 +3,8 @@ import { dados } from "@/dados";
 import { useEstado } from "@/app/estado";
 import { navegar } from "@/app/rota";
 import { Icone, Marca } from "@/componentes/Icone";
+import { CalcularCalorias } from "@/componentes/CalcularCalorias";
+import type { EstimativaCalorias } from "@/lib/calorias";
 
 /** Primeiro acesso, em 3 passos curtos. Tudo dá para mudar depois no Perfil. */
 export default function BoasVindas() {
@@ -16,13 +18,17 @@ export default function BoasVindas() {
   const aguaSugerida = Number.isFinite(pesoN) && pesoN > 30 ? Math.round((pesoN * 35) / 100) * 100 : 2000;
   const [passos, setPassos] = useState(String(perfil?.metas.passos ?? 8000));
   const [agua, setAgua] = useState<string | null>(null);
-  const [kcal, setKcal] = useState(String(perfil?.metas.kcal ?? 1800));
+  const [kcal, setKcal] = useState("");
+  const [calculo, setCalculo] = useState<EstimativaCalorias | null>(null);
+  const [calculando, setCalculando] = useState(false);
 
   const concluir = async (irParaPlano: boolean) => {
     // Cada conta começa vazia: só o que a própria pessoa preencher aqui.
     const metas = {
       ...perfil!.metas,
-      kcal: Math.min(6000, Math.max(800, parseInt(kcal, 10) || perfil!.metas.kcal)),
+      kcal: Math.min(6000, Math.max(800, parseInt(kcal.replace(/\D/g, ""), 10) || perfil!.metas.kcal)),
+      // Macros da calculadora só valem se a pessoa não mudou as calorias depois.
+      ...(calculo && String(calculo.kcal) === kcal ? { proteinaG: calculo.proteinaG, carboG: calculo.carboG, gorduraG: calculo.gorduraG } : {}),
       passos: Math.max(1000, parseInt(passos, 10) || 8000),
       aguaMl: Math.max(500, parseInt(agua ?? String(aguaSugerida), 10) || aguaSugerida),
     };
@@ -95,8 +101,31 @@ export default function BoasVindas() {
               <span className="selo-icone"><Icone nome="comer" tamanho={18} /></span>
               <span className="subtitulo">Calorias por dia (kcal)</span>
             </div>
-            <input className="entrada num" inputMode="numeric" value={kcal} onChange={(e) => setKcal(e.target.value)} aria-label="Meta de calorias por dia" />
-            <p className="legenda" style={{ margin: "8px 0 0" }}>Se a sua nutricionista passou um valor, use ele. Ao enviar o plano, as metas dele valem.</p>
+            <input className="entrada num" inputMode="numeric" placeholder="ex.: 1800" value={kcal} onChange={(e) => setKcal(e.target.value)} aria-label="Meta de calorias por dia" />
+            <p className="legenda" style={{ margin: "8px 0 0" }}>
+              {calculo && String(calculo.kcal) === kcal
+                ? `Calculada para você: proteína ${calculo.proteinaG} g, carboidrato ${calculo.carboG} g e gordura ${calculo.gorduraG} g.`
+                : "Se a sua nutricionista passou um valor, use ele. Ao enviar o plano, as metas dele valem."}
+            </p>
+            {!calculando && (
+              <button type="button" className="botao secundario cheio" style={{ marginTop: 12, width: "100%" }} onClick={() => setCalculando(true)}>
+                <Icone nome="brilho" tamanho={18} /> Não sei, calcular pra mim
+              </button>
+            )}
+            {calculando && (
+              <div style={{ marginTop: 14 }}>
+                <CalcularCalorias
+                  pesoKg={Number.isFinite(pesoN) ? pesoN : null}
+                  alturaCm={parseInt(altura, 10) || null}
+                  nascimento={nascimento || null}
+                  aoUsar={(e) => {
+                    setCalculo(e);
+                    setKcal(String(e.kcal));
+                    setCalculando(false);
+                  }}
+                />
+              </div>
+            )}
           </div>
           <div className="linha" style={{ marginTop: 12 }}>
             <button className="botao secundario" onClick={() => setPasso(1)}>Voltar</button>

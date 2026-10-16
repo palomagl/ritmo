@@ -4,6 +4,7 @@ import { useAvisos, useEstado } from "@/app/estado";
 import { Folha, Topo } from "@/componentes/basicos";
 import { Icone } from "@/componentes/Icone";
 import { Link } from "@/app/rota";
+import { CalcularCalorias } from "@/componentes/CalcularCalorias";
 import { conectarStrava, desconectarStrava, sincronizarStrava } from "@/lib/strava";
 import { ativarAvisos, desativarAvisos, situacaoAvisos, testarAviso, type SituacaoAvisos } from "@/lib/avisos";
 import { formatarMl } from "@/lib/agua";
@@ -196,7 +197,10 @@ function EditarMetas({
     dormeH: String(dormeH),
   });
   const [v, setV] = useState(inicial);
+  const [calculando, setCalculando] = useState(false);
+  const { perfil } = useEstado();
   useEffect(() => {
+    setCalculando(false);
     if (aberto) setV(inicial());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aberto]);
@@ -223,6 +227,23 @@ function EditarMetas({
           {campo("acordaH", "Acordo às (h)")}
           {campo("dormeH", "Durmo às (h)")}
         </div>
+        {calculando ? (
+          <div className="card cor-comida" style={{ padding: 16 }}>
+            <CalcularCalorias
+              pesoKg={perfil?.pesoKg}
+              alturaCm={perfil?.alturaCm}
+              nascimento={perfil?.nascimento}
+              aoUsar={(e) => {
+                setV({ ...v, kcal: String(e.kcal), proteinaG: String(e.proteinaG), carboG: String(e.carboG), gorduraG: String(e.gorduraG) });
+                setCalculando(false);
+              }}
+            />
+          </div>
+        ) : (
+          <button type="button" className="botao texto" style={{ justifySelf: "start", alignSelf: "flex-start" }} onClick={() => setCalculando(true)}>
+            <Icone nome="brilho" tamanho={18} /> Não sei minhas calorias: calcular
+          </button>
+        )}
         {campo("copos", "Copos de água (ml, separados por vírgula)", "text")}
         <p className="legenda" style={{ margin: 0 }}>As de comida e água vêm do plano alimentar quando ele é enviado.</p>
         <button
