@@ -14,6 +14,11 @@ import { milhar } from "@/lib/passos";
 function aplicarTema(t: Tema) {
   if (t === "auto") document.documentElement.removeAttribute("data-tema");
   else document.documentElement.setAttribute("data-tema", t);
+  const cor = t === "claro" || (t === "auto" && !window.matchMedia("(prefers-color-scheme: dark)").matches) ? "#EEF3FA" : "#0B1020";
+  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
+    m.removeAttribute("media");
+    m.setAttribute("content", cor);
+  });
   try {
     if (t === "auto") localStorage.removeItem("pulso:tema");
     else localStorage.setItem("pulso:tema", t);

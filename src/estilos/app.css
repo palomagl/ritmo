@@ -132,6 +132,11 @@
 
 html {
   background: var(--fundo);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: hidden;
+  /* Sem zoom por pinça nem toque duplo: o app é de tela fixa. */
+  touch-action: pan-x pan-y;
 }
 html,
 body {
@@ -2174,4 +2179,22 @@ textarea.entrada {
 @keyframes surgir {
   from { opacity: 0; transform: translate(-50%, -47%) scale(0.98); }
   to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Telas estreitas (Android compacto, fonte grande): nada passa da borda. */
+.grade-2 > *,
+.linha > * {
+  min-width: 0;
+}
+@media (max-width: 380px) {
+  .botao {
+    padding: 0 14px;
+    font-size: 15px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .grade-2 {
+    gap: 8px;
+  }
 }
