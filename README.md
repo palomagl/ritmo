@@ -93,9 +93,13 @@ Vidro fosco sobre luz azul difusa, tipografia Inter, azul e azul-violeta como ma
 
 ## Privacidade
 
-- Cada pessoa só enxerga os próprios dados: as regras do banco bloqueiam qualquer acesso que não seja o da dona da conta.
+- Cada pessoa só enxerga os próprios dados: as regras do banco bloqueiam qualquer acesso que não seja o da dona da conta, só aceitam as coleções do app e põem teto no tamanho dos documentos.
+- Contas novas começam vazias; nada de uma conta passa para outra.
 - A IA é protegida por **App Check**: só o app publicado consegue usá-la.
-- O token dos passos é pessoal, pode ser trocado a qualquer momento e só grava os passos do dia.
+- A chave do Atalho dos passos só grava passos, fica guardada só como impressão (sha-256) e gerar outra desliga a anterior.
+- **Sair** apaga do aparelho o cache offline, a fila de fotos e as notificações daquele aparelho. Dá para **sair de todos os aparelhos** e **apagar a conta e todos os dados** no Perfil.
+- Cabeçalhos de segurança na Vercel (nosniff, frame, referrer, permissões de câmera e localização).
+- Uma página de **Privacidade** explica o que fica guardado e o que vai para a IA (o plano gratuito do Gemini pode usar o conteúdo para melhorar os produtos do Google).
 
 ## Como é feito
 
@@ -147,7 +151,7 @@ npm run dev    # com o Firebase de verdade (precisa do .env)
 
 ### Firebase
 1. Crie o projeto, ative **Authentication → Google** e crie o **Firestore** (edição Standard, `southamerica-east1`).
-2. Cole o conteúdo de `firestore.rules` na aba **Regras** do Firestore e publique.
+2. Cole o conteúdo de `firestore.rules` na aba **Regras** do Firestore e publique (de novo a cada versão que mudar esse arquivo).
 3. **AI Logic → Começar → Gemini Developer API** (funciona no plano grátis).
 4. **App Check → Apps →** registre o app web com **Fraud Defense** usando a chave de site do reCAPTCHA (criada em Google Cloud → Segurança → reCAPTCHA, tipo Web, sem desafio de caixa).
 5. **Authentication → Configurações → Domínios autorizados:** adicione o domínio da Vercel.
@@ -179,7 +183,7 @@ Em **strava.com/settings/api**, crie um app com o domínio da Vercel em *Authori
 3. No iPhone, abra o ritmo instalado na Tela de Início, vá em **Perfil → Lembretes → Ativar notificações** e toque em **Enviar teste**.
 
 ### Passos do iPhone
-No app, **Perfil → Passos do iPhone** mostra o endereço e o token para copiar. O Atalho tem só três ações: *Localizar Amostras de Saúde* (Passos, hoje), *Calcular Estatísticas* (Soma) e *Obter Conteúdo do URL* (POST, JSON com `passos` e `token`). Uma automação por horário faz o resto.
+No app, **Perfil → Passos do iPhone** mostra o endereço e gera a chave dos passos (precisa do `FIREBASE_SERVICE_ACCOUNT`). O Atalho tem só três ações: *Localizar Amostras de Saúde* (Passos, hoje), *Calcular Estatísticas* (Soma) e *Obter Conteúdo do URL* (POST, JSON com `passos` e `token` = a chave). Uma automação por horário faz o resto. Atalhos antigos, com o token de login no lugar da chave, continuam funcionando até serem trocados.
 
 ## Próximos passos
 

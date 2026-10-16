@@ -47,3 +47,25 @@ export function servidor() {
       : chavesDerivadas(conta.private_key);
   return { db: getFirestore(app), auth: getAuth(app), vapid };
 }
+
+/** sha-256 em hex: guardamos só a impressão da chave, nunca a chave. */
+export function impressao(texto) {
+  return createHash("sha256").update(String(texto)).digest("hex");
+}
+
+/** Prefixo das chaves dos passos: separa de um token antigo do Firebase. */
+export const PREFIXO_CHAVE = "rtm_";
+
+/**
+ * Quem está chamando, pelo token do login (Authorization: Bearer ...).
+ * Com `exigirAtual`, recusa sessões encerradas em "sair de todos os aparelhos".
+ */
+export async function quemChama(req, s, exigirAtual = false) {
+  const token = String(req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+  if (!token) return null;
+  try {
+    return (await s.auth.verifyIdToken(token, exigirAtual)).uid;
+  } catch {
+    return null;
+  }
+}

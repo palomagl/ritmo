@@ -2,10 +2,14 @@
 // POST /api/passos — recebe os passos do Atalho do iPhone
 // ==============================================
 // O Atalho só precisa somar os passos do app Saúde e mandar para cá, junto
-// com o token pessoal que aparece em Perfil → Passos do iPhone. Aqui o token
-// vira uma sessão de verdade (a mesma do login) e os passos são gravados no
-// dia de hoje, no fuso de São Paulo. As regras do Firestore continuam
-// valendo: cada token só alcança os dados da própria pessoa.
+// com a chave dos passos gerada em Perfil → Passos do iPhone (campo
+// "token"). A chave só serve para isto: grava os passos do dia e nada mais,
+// e gerar outra desliga a anterior. Guardamos só a impressão (sha-256) dela.
+//
+// Atalhos antigos mandam o token de login do Firebase: continua aceito,
+// pelo caminho de antes, até a pessoa trocar pela chave.
+
+import { impressao, PREFIXO_CHAVE, servidor } from "./_servidor.js";
 
 const FUSO = "America/Sao_Paulo";
 
@@ -49,11 +53,34 @@ export default async function handler(req, res) {
   const data = /^\d{4}-\d{2}-\d{2}$/.test(String(corpo.data ?? "")) ? corpo.data : hoje();
 
   if (!token) {
-    res.status(400).json({ ok: false, erro: "Faltou o token. Copie em Perfil → Passos do iPhone." });
+    res.status(400).json({ ok: false, erro: "Faltou a chave. Gere em Perfil → Passos do iPhone." });
     return;
   }
   if (!Number.isFinite(passos) || passos < 0 || passos > 200000) {
     res.status(400).json({ ok: false, erro: "Os passos não vieram como número." });
+    return;
+  }
+
+  // Chave dos passos (o jeito novo).
+  if (token.startsWith(PREFIXO_CHAVE)) {
+    let s;
+    try {
+      s = servidor();
+    } catch {
+      s = null;
+    }
+    if (!s) {
+      res.status(500).json({ ok: false, erro: "Falta configurar FIREBASE_SERVICE_ACCOUNT na Vercel." });
+      return;
+    }
+    const doc = await s.db.collection("chavesPassos").doc(impressao(token)).get();
+    if (!doc.exists) {
+      res.status(401).json({ ok: false, erro: "Chave inválida. Gere uma nova em Perfil → Passos do iPhone." });
+      return;
+    }
+    const uid = doc.data().uid;
+    await s.db.collection("users").doc(uid).collection("pulsoDias").doc(data).set({ passos, passosSyncEm: new Date() }, { merge: true });
+    res.status(200).json({ ok: true, passos, data, mensagem: `${passos.toLocaleString("pt-BR")} passos enviados ao ritmo` });
     return;
   }
 

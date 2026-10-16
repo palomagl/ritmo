@@ -377,7 +377,6 @@ export function criarLocal(opcoes: {
       salvar();
       return true;
     },
-    dadosAtalho: async () => ({ projeto: "minha-rotina-xxxx", chave: "AIza...exemplo", uid: "demo", token: "token-de-exemplo" }),
     // Sem servidor no modo demonstração: as notificações ficam desligadas.
     salvarInscricaoAviso: async () => {},
     excluirInscricaoAviso: async () => {},

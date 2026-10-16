@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { dados, MODO_DEMO, type DadosAtalho, type HabitoRotina, type Metas, type PrefsLembretes, type Tema } from "@/dados";
+import { dados, MODO_DEMO, type HabitoRotina, type Metas, type PrefsLembretes, type Tema } from "@/dados";
 import { useAvisos, useEstado } from "@/app/estado";
 import { Folha, Topo } from "@/componentes/basicos";
 import { Icone } from "@/componentes/Icone";
 import { Link } from "@/app/rota";
 import { CalcularCalorias } from "@/componentes/CalcularCalorias";
+import { apagarConta, gerarChavePassos, sairDaConta, sairDeTodosOsAparelhos } from "@/lib/conta";
 import { conectarStrava, desconectarStrava, sincronizarStrava } from "@/lib/strava";
 import { ativarAvisos, desativarAvisos, situacaoAvisos, testarAviso, type SituacaoAvisos } from "@/lib/avisos";
 import { formatarMl } from "@/lib/agua";
@@ -33,6 +34,7 @@ export default function Perfil() {
   });
   const [editandoMetas, setEditandoMetas] = useState(false);
   const [atalho, setAtalho] = useState(false);
+  const [apagando, setApagando] = useState(false);
   const [habitos, setHabitos] = useState<HabitoRotina[] | null>(null);
 
   useEffect(() => {
@@ -153,17 +155,43 @@ export default function Perfil() {
       </section>
 
 
-      <p className="rotulo-secao">Seus dados</p>
+      <p className="rotulo-secao">Privacidade e segurança</p>
+      <Link para="/privacidade" className="card card-toque linha cor-passos">
+        <span className="selo-icone"><Icone nome="escudo" tamanho={18} /></span>
+        <span className="cresce">
+          <b>Como seus dados são protegidos</b>
+          <br />
+          <span className="legenda">O que fica guardado, quem vê e o que vai para a IA</span>
+        </span>
+        <Icone nome="seta" tamanho={18} className="suave" />
+      </Link>
       <button className="botao contorno" onClick={exportar}>
-        <Icone nome="baixar" tamanho={18} /> Exportar tudo (JSON)
+        <Icone nome="baixar" tamanho={18} /> Baixar uma cópia dos meus dados
       </button>
-      <button className="botao perigo" onClick={() => dados.sair()}>
+      <BotaoConfirmar
+        texto="Sair de todos os aparelhos"
+        confirmar="Toque de novo para sair de todos"
+        icone="escudo"
+        className="botao contorno"
+        acao={async () => {
+          try {
+            await sairDeTodosOsAparelhos();
+          } catch (e) {
+            avisar((e as Error).message);
+          }
+        }}
+      />
+      <button className="botao perigo" onClick={() => void sairDaConta()}>
         <Icone nome="sair" tamanho={18} /> Sair da conta
+      </button>
+      <button className="botao texto" style={{ color: "var(--erro)" }} onClick={() => setApagando(true)}>
+        Apagar minha conta e meus dados
       </button>
       <p className="legenda" style={{ textAlign: "center" }}>{`ritmo 1.0${MODO_DEMO ? " · modo demonstração" : ""}`}</p>
 
       <EditarMetas aberto={editandoMetas} aoFechar={() => setEditandoMetas(false)} metas={m} copos={perfil.copos} acordaH={perfil.acordaH} dormeH={perfil.dormeH} aoSalvar={() => avisar("Metas salvas")} />
       <GuiaAtalho aberto={atalho} aoFechar={() => setAtalho(false)} />
+      <ApagarConta aberto={apagando} aoFechar={() => setApagando(false)} />
     </div>
   );
 }
@@ -272,6 +300,77 @@ function EditarMetas({
           }}
         >
           Salvar
+        </button>
+      </div>
+    </Folha>
+  );
+}
+
+/** Botão que pede um segundo toque antes de agir. */
+function BotaoConfirmar({ texto, confirmar, icone, className, acao }: { texto: string; confirmar: string; icone: "escudo" | "sair"; className: string; acao: () => Promise<void> }) {
+  const [armado, setArmado] = useState(false);
+  const [ocupado, setOcupado] = useState(false);
+  useEffect(() => {
+    if (!armado) return;
+    const t = setTimeout(() => setArmado(false), 4000);
+    return () => clearTimeout(t);
+  }, [armado]);
+  return (
+    <button
+      className={className}
+      disabled={ocupado}
+      onClick={async () => {
+        if (!armado) return setArmado(true);
+        setOcupado(true);
+        await acao();
+        setOcupado(false);
+        setArmado(false);
+      }}
+    >
+      <Icone nome={icone} tamanho={18} /> {ocupado ? "Um momento…" : armado ? confirmar : texto}
+    </button>
+  );
+}
+
+/** Apagar a conta: diz o que vai embora e pede para digitar APAGAR. */
+function ApagarConta({ aberto, aoFechar }: { aberto: boolean; aoFechar: () => void }) {
+  const [texto, setTexto] = useState("");
+  const [apagando, setApagando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+  useEffect(() => {
+    if (aberto) {
+      setTexto("");
+      setErro(null);
+    }
+  }, [aberto]);
+  const pode = texto.trim().toUpperCase() === "APAGAR";
+  return (
+    <Folha aberta={aberto} aoFechar={aoFechar} titulo="Apagar conta e dados">
+      <div className="pilha">
+        <p style={{ margin: 0 }}>
+          Vão embora, sem volta: refeições e fotos, plano alimentar, peso e medidas, água, passos, corridas, lembretes e a conexão com o Strava. A conta do Google continua sua; só o ritmo esquece você.
+        </p>
+        <p className="legenda" style={{ margin: 0 }}>Quer guardar algo antes? Use “Baixar uma cópia dos meus dados”.</p>
+        <div className="campo">
+          <label htmlFor="apagar-confirma">Digite APAGAR para confirmar</label>
+          <input id="apagar-confirma" className="entrada" autoComplete="off" value={texto} onChange={(e) => setTexto(e.target.value)} />
+        </div>
+        {erro && <p className="legenda" style={{ color: "var(--erro)", margin: 0 }}>{erro}</p>}
+        <button
+          className="botao perigo cheio"
+          disabled={!pode || apagando}
+          onClick={async () => {
+            setApagando(true);
+            setErro(null);
+            try {
+              await apagarConta();
+            } catch (e) {
+              setErro((e as Error).message);
+              setApagando(false);
+            }
+          }}
+        >
+          <Icone nome="lixo" tamanho={18} /> {apagando ? "Apagando…" : "Apagar tudo"}
         </button>
       </div>
     </Folha>
@@ -435,17 +534,17 @@ function CartaoStrava() {
 }
 
 /**
- * Passo a passo do Atalho do iPhone, com os valores prontos para copiar.
- * O app Atalhos lê o app Saúde e grava no Firestore pela API REST, entrando
- * com o token da própria pessoa: as regras de segurança continuam valendo.
+ * Passo a passo do Atalho do iPhone. O Atalho manda os passos com uma chave
+ * que só serve para isso (gerada no servidor, guardada só como impressão):
+ * se vazar, ninguém lê nada da conta, e gerar outra desliga a anterior.
  */
 function GuiaAtalho({ aberto, aoFechar }: { aberto: boolean; aoFechar: () => void }) {
   const avisar = useAvisos();
-  const [d, setD] = useState<DadosAtalho | null>(null);
-  const [mostrarToken, setMostrarToken] = useState(false);
+  const [chave, setChave] = useState<string | null>(null);
+  const [gerando, setGerando] = useState(false);
 
   useEffect(() => {
-    if (aberto) void dados.dadosAtalho().then(setD);
+    if (!aberto) setChave(null);
   }, [aberto]);
 
   const copiar = async (texto: string, oQue: string) => {
@@ -457,15 +556,26 @@ function GuiaAtalho({ aberto, aoFechar }: { aberto: boolean; aoFechar: () => voi
     }
   };
 
+  const gerar = async () => {
+    setGerando(true);
+    try {
+      setChave(await gerarChavePassos());
+    } catch (e) {
+      avisar((e as Error).message);
+    } finally {
+      setGerando(false);
+    }
+  };
+
   // O app recebe os passos em /api/passos: o Atalho só soma e manda.
   const urlEnviar = `${window.location.origin}/api/passos`;
 
-  const Copiavel = ({ rotulo, valor, oculto }: { rotulo: string; valor: string; oculto?: boolean }) => (
+  const Copiavel = ({ rotulo, valor }: { rotulo: string; valor: string }) => (
     <div className="campo">
       <span className="legenda">{rotulo}</span>
       <div className="linha" style={{ gap: 8 }}>
         <code className="entrada cresce" style={{ fontSize: 12, wordBreak: "break-all", minHeight: 0, lineHeight: "18px" }}>
-          {oculto ? "••••••••••••••••" : valor}
+          {valor}
         </code>
         <button className="botao-icone" aria-label={`Copiar ${rotulo}`} onClick={() => copiar(valor, rotulo)}>
           <Icone nome="copiar" tamanho={18} />
@@ -476,35 +586,39 @@ function GuiaAtalho({ aberto, aoFechar }: { aberto: boolean; aoFechar: () => voi
 
   return (
     <Folha aberta={aberto} aoFechar={aoFechar} titulo="Passos do iPhone">
-      {!d ? (
-        <p className="suave">Carregando…</p>
-      ) : (
-        <div className="pilha">
-          <p className="suave" style={{ margin: 0 }}>
-            O navegador não lê o app Saúde, mas o app <b>Atalhos</b> lê. Crie um atalho chamado <b>Passos pro Ritmo</b> com só 3 ações:
-          </p>
-          <ol style={{ paddingLeft: 20, margin: 0, display: "grid", gap: 8 }}>
-            <li><b>Localizar Amostras de Saúde</b>: tipo <b>Passos</b>, Data de Início é <b>Hoje</b>. Se usa Apple Watch, adicione o filtro Fonte é o seu iPhone (senão conta em dobro).</li>
-            <li><b>Calcular Estatísticas</b>: <b>Soma</b>.</li>
-            <li><b>Obter Conteúdo do URL</b>: cole o endereço abaixo, método <b>POST</b>, Corpo da Requisição <b>JSON</b> com dois campos: <code>passos</code> (Número) = Estatísticas, e <code>token</code> (Texto) = o seu token.</li>
-          </ol>
-          <p className="suave" style={{ margin: 0 }}>
-            Toque em ▶️ para testar: os passos aparecem em Mover. Depois, em <b>Automação → Hora do Dia</b>, crie para 12:00, 18:00, 21:00 e 23:50, com <b>Executar Imediatamente</b>.
-          </p>
-          <Copiavel rotulo="Endereço (URL)" valor={urlEnviar} />
-          <div className="campo">
-            <Copiavel rotulo="Seu token" valor={d.token} oculto={!mostrarToken} />
-            <button className="botao texto pequeno" style={{ justifySelf: "start" }} onClick={() => setMostrarToken((x) => !x)}>
-              {mostrarToken ? "Esconder token" : "Mostrar token"}
+      <div className="pilha">
+        <p className="suave" style={{ margin: 0 }}>
+          O navegador não lê o app Saúde, mas o app <b>Atalhos</b> lê. Crie um atalho chamado <b>Passos pro ritmo</b> com só 3 ações:
+        </p>
+        <ol style={{ paddingLeft: 20, margin: 0, display: "grid", gap: 8 }}>
+          <li><b>Localizar Amostras de Saúde</b>: tipo <b>Passos</b>, Data de Início é <b>Hoje</b>. Se usa Apple Watch, adicione o filtro Fonte é o seu iPhone (senão conta em dobro).</li>
+          <li><b>Calcular Estatísticas</b>: <b>Soma</b>.</li>
+          <li><b>Obter Conteúdo do URL</b>: cole o endereço abaixo, método <b>POST</b>, Corpo da Requisição <b>JSON</b> com dois campos: <code>passos</code> (Número) = Estatísticas, e <code>token</code> (Texto) = a sua chave.</li>
+        </ol>
+        <p className="suave" style={{ margin: 0 }}>
+          Toque em ▶️ para testar: os passos aparecem em Mover. Depois, em <b>Automação → Hora do Dia</b>, crie para 12:00, 18:00, 21:00 e 23:50, com <b>Executar Imediatamente</b>.
+        </p>
+        <Copiavel rotulo="Endereço (URL)" valor={urlEnviar} />
+        {chave ? (
+          <>
+            <Copiavel rotulo="Sua chave dos passos" valor={chave} />
+            <div className="card cor-comida" style={{ padding: 14 }}>
+              <p className="legenda" style={{ margin: 0, color: "var(--texto)" }}>
+                <b>Ela só aparece agora:</b> copie para o Atalho. Se perder, gere outra aqui; a anterior para de funcionar na hora.
+              </p>
+            </div>
+          </>
+        ) : (
+          <div className="card cor-passos" style={{ padding: 14 }}>
+            <p className="legenda" style={{ margin: "0 0 10px", color: "var(--texto)" }}>
+              A chave só serve para mandar passos: mesmo que alguém a veja, não lê nada da sua conta. Já usa o Atalho com o token antigo? Gere a chave e troque no Atalho.
+            </p>
+            <button className="botao cheio" style={{ width: "100%" }} onClick={gerar} disabled={gerando}>
+              <Icone nome="escudo" tamanho={18} /> {gerando ? "Gerando…" : "Gerar minha chave"}
             </button>
           </div>
-          <div className="card cor-comida" style={{ padding: 14 }}>
-            <p className="legenda" style={{ margin: 0, color: "var(--texto)" }}>
-              <b>Importante:</b> o token dá acesso aos seus dados; não compartilhe. Se sair da conta e entrar de novo, copie o token novo para o Atalho.
-            </p>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </Folha>
   );
 }

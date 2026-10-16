@@ -1,28 +1,65 @@
 rules_version = '2';
 
 // ==============================================
-// Regras de segurança do Firestore (Pulso)
+// Regras de segurança do Firestore (ritmo)
 // ==============================================
-// Iguais às do Minha Rotina, de propósito: se os dois apps dividem o mesmo
-// projeto, uma regra só protege os dois.
+// Cole na aba Regras do Firestore e publique.
 //
-// Todo dado mora embaixo de /users/{uid}, e só a dona daquele uid alcança o
-// caminho. O Atalho do iPhone que manda os passos entra com o token da
-// própria pessoa, então passa por esta mesma regra.
+// 1. Tudo de uma pessoa mora em /users/{uid}, e só ela (logada com o Google)
+//    alcança esse caminho. Ninguém lê nem lista a conta de outra pessoa.
+// 2. Só as coleções que o app usa existem: qualquer outro nome é recusado.
+// 3. Tamanhos com teto, para ninguém lotar o banco com um documento gigante.
+// 4. O que é só do servidor (chaves dos passos, estado dos lembretes) o
+//    navegador não escreve. O servidor entra com a conta de serviço, que
+//    não passa por estas regras.
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isOwner(uid) {
+    function dona(uid) {
       return request.auth != null && request.auth.uid == uid;
     }
 
-    match /users/{uid} {
-      allow read, write: if isOwner(uid);
+    // As coleções que o navegador pode usar dentro de /users/{uid}. `habits` e
+    // `days` são do Minha Rotina, para quando os dois apps dividem o projeto.
+    function COLECOES() {
+      return ["pulsoDias", "pulsoRefeicoes", "pulsoPlano", "pulsoFavoritos", "pulsoCorridas", "pulsoMedidas", "pulsoAvisos", "habits", "days"];
+    }
 
-      match /{document=**} {
-        allow read, write: if isOwner(uid);
+    // Documento novo ou alterado com no máximo `n` campos no primeiro nível.
+    function camposAte(n) {
+      return request.resource.data.keys().size() <= n;
+    }
+
+    match /users/{uid} {
+      // O perfil fica no campo `pulso` deste documento.
+      allow read, delete: if dona(uid);
+      allow create, update: if dona(uid) && camposAte(30);
+
+      // Dados do dia a dia do ritmo.
+      match /{colecao}/{id} {
+        allow read, delete: if dona(uid) && colecao in COLECOES();
+        allow create, update: if dona(uid) && colecao in COLECOES() && camposAte(40);
       }
+
+      // Fotos dos pratos: um documento por refeição, com teto de tamanho.
+      match /pulsoFotos/{id} {
+        allow read, delete: if dona(uid);
+        allow create, update: if dona(uid)
+          && request.resource.data.base64 is string
+          && request.resource.data.base64.size() < 900000;
+      }
+
+      // O que já foi avisado: escrito pelo servidor, só leitura aqui.
+      match /pulsoLembretes/{id} {
+        allow read: if dona(uid);
+      }
+    }
+
+    // Chaves do Atalho dos passos: só o servidor lê e escreve.
+    match /chavesPassos/{id} {
+      allow read, write: if false;
     }
   }
 }
+

@@ -23,6 +23,7 @@ import {
   addDoc,
   arrayRemove,
   arrayUnion,
+  clearIndexedDbPersistence,
   collection,
   deleteDoc,
   doc,
@@ -37,6 +38,7 @@ import {
   query,
   setDoc,
   startAt,
+  terminate,
   updateDoc,
   where,
   writeBatch,
@@ -145,6 +147,13 @@ export function criarFirestore(): Backend {
 
     async sair() {
       await signOut(fb.auth);
+      // O cache offline guarda uma cópia dos dados no aparelho: ao sair, some.
+      try {
+        await terminate(fb.db);
+        await clearIndexedDbPersistence(fb.db);
+      } catch (e) {
+        console.warn("Não consegui limpar o cache local:", e);
+      }
     },
 
     async erroDeLogin() {
@@ -412,12 +421,6 @@ export function criarFirestore(): Backend {
         "dia do Rotina"
       );
       return true;
-    },
-
-    async dadosAtalho() {
-      const u = fb.auth.currentUser;
-      if (!u) return null;
-      return { projeto: fb.config.projectId, chave: fb.config.apiKey, uid: u.uid, token: u.refreshToken };
     },
 
     salvarInscricaoAviso(i) {

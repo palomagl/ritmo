@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { dados, MODO_DEMO } from "@/dados";
 import { GoogleG, Marca } from "@/componentes/Icone";
+import { Link } from "@/app/rota";
 
 const MENSAGENS: Record<string, string> = {
   "auth/unauthorized-domain": "Este endereço não está autorizado no Firebase. Adicione o domínio em Authentication → Settings → Authorized domains.",
@@ -65,6 +66,10 @@ export default function Entrar() {
             {MENSAGENS[erro] ?? "Não foi possível entrar agora. Tente de novo."}
           </p>
         )}
+        <p className="legenda" style={{ textAlign: "center", margin: "16px 0 0" }}>
+          Seus dados ficam só na sua conta.{" "}
+          <Link para="/privacidade" style={{ color: "var(--pulso-texto)", fontWeight: 600 }}>Como protegemos</Link>
+        </p>
       </div>
     </div>
   );

@@ -43,6 +43,8 @@ export interface Perfil {
   lembretes?: PrefsLembretes;
   /** A conta já passou pela limpeza dos dados copiados por engano (v1). */
   limpezaV1?: boolean;
+  /** A pessoa fechou o "Comece por aqui" do Hoje. */
+  guiaInicioOculto?: boolean;
   boasVindasFeitas: boolean;
 }
 
@@ -201,13 +203,6 @@ export interface Usuario {
   foto: string | null;
 }
 
-export interface DadosAtalho {
-  projeto: string;
-  chave: string;
-  uid: string;
-  token: string;
-}
-
 export type Cancelar = () => void;
 
 /** Tudo que as telas podem pedir aos dados. */
@@ -265,7 +260,6 @@ export interface Backend {
   listarHabitosRotina(): Promise<HabitoRotina[]>;
   /** Marca o hábito hoje, se ainda não estiver marcado. Devolve se marcou. */
   marcarHabitoRotina(id: string): Promise<boolean>;
-  dadosAtalho(): Promise<DadosAtalho | null>;
 
   // Notificações
   salvarInscricaoAviso(i: InscricaoAviso): Promise<void>;

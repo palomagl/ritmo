@@ -26,6 +26,7 @@ const Corpo = lazy(() => import("@/telas/Corpo"));
 const Perfil = lazy(() => import("@/telas/Perfil"));
 const StravaRetorno = lazy(() => import("@/telas/StravaRetorno"));
 const Semana = lazy(() => import("@/telas/Semana"));
+const Privacidade = lazy(() => import("@/telas/Privacidade"));
 
 /** Tela de espera: a marca no meio, sem piscar conteúdo pela metade. */
 function Abertura() {
@@ -63,6 +64,7 @@ const ROTAS: { padrao: string; tela: (p: Record<string, string>) => ReactNode; s
   { padrao: "/corpo", tela: () => <Corpo /> },
   { padrao: "/perfil", tela: () => <Perfil /> },
   { padrao: "/semana", tela: () => <Semana /> },
+  { padrao: "/privacidade", tela: () => <Privacidade />, semBarra: true },
   { padrao: "/strava", tela: () => <StravaRetorno />, semBarra: true },
 ];
 
@@ -129,6 +131,14 @@ function Conteudo() {
 
   if (ERRO_CONFIG) return <Configurar erro={ERRO_CONFIG} />;
   if (carregandoConta) return <Abertura />;
+  // A página de privacidade abre também sem login (link da tela de entrada).
+  if (!usuario && caminho === "/privacidade") {
+    return (
+      <Suspense fallback={<Abertura />}>
+        <Privacidade />
+      </Suspense>
+    );
+  }
   if (!usuario) return <Entrar />;
   if (!perfil) return <Abertura />;
   if (!perfil.boasVindasFeitas) return <BoasVindas />;
