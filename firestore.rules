@@ -20,10 +20,9 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == uid;
     }
 
-    // As coleções que o navegador pode usar dentro de /users/{uid}. `habits` e
-    // `days` são do Minha Rotina, para quando os dois apps dividem o projeto.
+    // As coleções que o navegador pode usar dentro de /users/{uid}.
     function COLECOES() {
-      return ["pulsoDias", "pulsoRefeicoes", "pulsoPlano", "pulsoFavoritos", "pulsoCorridas", "pulsoMedidas", "pulsoAvisos", "habits", "days"];
+      return ["pulsoDias", "pulsoRefeicoes", "pulsoPlano", "pulsoFavoritos", "pulsoCorridas", "pulsoMedidas", "pulsoAvisos"];
     }
 
     // Documento novo ou alterado com no máximo `n` campos no primeiro nível.

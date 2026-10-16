@@ -5,10 +5,7 @@ import { dados } from "@/dados";
 import { formatarMl } from "@/lib/agua";
 import { useAvisos, useEstado } from "./estado";
 
-/**
- * Registra água com "Desfazer" no aviso. Quando o copo faz bater a meta,
- * comemora e marca o hábito do Minha Rotina (se estiver ligado no Perfil).
- */
+/** Registra água com "Desfazer" no aviso. Quando o copo faz bater a meta, comemora. */
 export function useRegistrarAgua() {
   const { hoje, dia, perfil } = useEstado();
   const avisar = useAvisos();
@@ -24,13 +21,7 @@ export function useRegistrarAgua() {
         rotulo: "Desfazer",
         fazer: () => void dados.desfazerAgua(registro, hoje),
       }, 5000);
-      if (bateu && perfil?.habitoAguaId) {
-        dados
-          .marcarHabitoRotina(perfil.habitoAguaId)
-          .then((marcou) => marcou && setTimeout(() => avisar("Hábito de água marcado no Minha Rotina ✓"), 1200))
-          .catch((e) => console.error("Falha ao marcar o hábito no Rotina:", e));
-      }
     },
-    [hoje, dia?.aguaMl, perfil?.metas.aguaMl, perfil?.habitoAguaId, avisar]
+    [hoje, dia?.aguaMl, perfil?.metas.aguaMl, avisar]
   );
 }

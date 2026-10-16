@@ -15,7 +15,6 @@ import type {
   Corrida,
   Dia,
   Favorito,
-  HabitoRotina,
   ItemAlimento,
   Medida,
   Perfil,
@@ -34,7 +33,6 @@ export interface Banco {
   favoritos: Favorito[];
   corridas: Corrida[];
   medidas: Medida[];
-  habitos: (HabitoRotina & { feitoEm: string | null })[];
 }
 
 const CHAVE = "pulso:demo:v1";
@@ -169,10 +167,6 @@ function semear(): Banco {
     favoritos,
     corridas,
     medidas,
-    habitos: [
-      { id: "h1", nome: "Beber água", icone: "💧", feitoEm: null },
-      { id: "h2", nome: "Ler 10 páginas", icone: "📚", feitoEm: null },
-    ],
   };
 }
 
@@ -365,14 +359,6 @@ export function criarLocal(opcoes: {
       salvar();
     },
 
-    listarHabitosRotina: async () => banco.habitos.map(({ id: hid, nome, icone }) => ({ id: hid, nome, icone })),
-    async marcarHabitoRotina(hid) {
-      const h = banco.habitos.find((x) => x.id === hid);
-      if (!h || h.feitoEm === chaveDia()) return false;
-      h.feitoEm = chaveDia();
-      salvar();
-      return true;
-    },
     // Sem servidor no modo demonstração: as notificações ficam desligadas.
     salvarInscricaoAviso: async () => {},
     excluirInscricaoAviso: async () => {},

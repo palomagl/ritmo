@@ -19,7 +19,7 @@ import {
   simplificar,
 } from "@/lib/corrida";
 
-/** Corridas e caminhadas (do Strava, do GPS do app ou de um GPX). */
+/** Corridas e caminhadas (pelo GPS do app ou de um arquivo GPX). */
 export default function Mover() {
   return (
     <div>

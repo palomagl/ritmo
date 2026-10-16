@@ -23,11 +23,10 @@ const SECOES: { icone: NomeIcone; cor: string; titulo: string; texto: string[] }
     ],
   },
   {
-    icone: "rota",
+    icone: "sino",
     cor: "pulso",
-    titulo: "Strava e notificações",
+    titulo: "Notificações",
     texto: [
-      "O Strava só é usado se você conectar, e só para ler corridas e caminhadas. Dá para desconectar no Perfil.",
       "As notificações saem do servidor do ritmo, que olha só o necessário: água do dia, horários do plano e as refeições registradas.",
     ],
   },

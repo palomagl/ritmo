@@ -69,7 +69,7 @@ export default function CorridaResumo({ id }: { id: string }) {
       <Topo titulo={corrida.tipo === "corrida" ? "Corrida" : "Caminhada"} voltarPara="/mover" />
       <p className="legenda" style={{ margin: "-14px 0 4px" }}>
         {dataPorExtenso(new Date(corrida.inicio))} · {horaMinuto(corrida.inicio)}
-        {corrida.fonte === "gpx" ? " · importada" : corrida.fonte === "strava" ? " · do Strava" : ""}
+        {corrida.fonte === "gpx" ? " · importada" : ""}
       </p>
 
       <Mapa pontos={rota} altura={260} />

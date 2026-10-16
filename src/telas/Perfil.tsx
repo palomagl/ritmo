@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { dados, MODO_DEMO, type HabitoRotina, type Metas, type PrefsLembretes, type Tema } from "@/dados";
+import { dados, MODO_DEMO, type Metas, type PrefsLembretes, type Tema } from "@/dados";
 import { useAvisos, useEstado } from "@/app/estado";
 import { Folha, Topo } from "@/componentes/basicos";
 import { Icone } from "@/componentes/Icone";
@@ -7,7 +7,6 @@ import { Link } from "@/app/rota";
 import { CalcularCalorias } from "@/componentes/CalcularCalorias";
 import { apagarConta, sairDaConta, sairDeTodosOsAparelhos } from "@/lib/conta";
 import { lerCopia, medidasAtuais, restaurarCopia, type CopiaParaRestaurar } from "@/lib/importar";
-import { conectarStrava, desconectarStrava, sincronizarStrava } from "@/lib/strava";
 import { ativarAvisos, desativarAvisos, situacaoAvisos, testarAviso, type SituacaoAvisos } from "@/lib/avisos";
 import { formatarMl } from "@/lib/agua";
 import { milhar } from "@/lib/passos";
@@ -47,11 +46,6 @@ export default function Perfil() {
       avisar((e as Error).message);
     }
   };
-  const [habitos, setHabitos] = useState<HabitoRotina[] | null>(null);
-
-  useEffect(() => {
-    void dados.listarHabitosRotina().then(setHabitos);
-  }, []);
 
   if (!perfil) return null;
   const m = perfil.metas;
@@ -125,36 +119,6 @@ export default function Perfil() {
         </span>
         <Icone nome="seta" tamanho={18} className="suave" />
       </Link>
-
-      <p className="rotulo-secao">Integrações</p>
-      <CartaoStrava />
-
-      <section className="card cor-agua">
-        <div className="card-cabeca">
-          <span className="selo-icone"><Icone nome="check" tamanho={18} /></span>
-          <div className="cresce">
-            <b>Minha Rotina</b>
-            <p className="legenda" style={{ margin: 0 }}>Ao bater a meta de água, marca este hábito lá:</p>
-          </div>
-        </div>
-        {habitos === null ? (
-          <p className="legenda" style={{ margin: 0 }}>Procurando seus hábitos…</p>
-        ) : habitos.length === 0 ? (
-          <p className="legenda" style={{ margin: 0 }}>
-            Nenhum hábito encontrado. Funciona quando o Ritmo usa o mesmo projeto Firebase do Minha Rotina (veja o README).
-          </p>
-        ) : (
-          <select className="entrada" value={perfil.habitoAguaId ?? ""} onChange={(e) => dados.salvarPerfil({ habitoAguaId: e.target.value || null })} aria-label="Hábito de água no Minha Rotina">
-            <option value="">Não marcar nenhum</option>
-            {habitos.map((h) => (
-              <option key={h.id} value={h.id}>
-                {h.icone} {h.nome}
-              </option>
-            ))}
-          </select>
-        )}
-      </section>
-
 
       <p className="rotulo-secao">Privacidade e segurança</p>
       <Link para="/privacidade" className="card card-toque linha cor-passos">
@@ -384,7 +348,7 @@ function ApagarConta({ aberto, aoFechar }: { aberto: boolean; aoFechar: () => vo
     <Folha aberta={aberto} aoFechar={aoFechar} titulo="Apagar conta e dados">
       <div className="pilha">
         <p style={{ margin: 0 }}>
-          Vão embora, sem volta: refeições e fotos, plano alimentar, peso e medidas, água, corridas, lembretes e a conexão com o Strava. A conta do Google continua sua; só o ritmo esquece você.
+          Vão embora, sem volta: refeições e fotos, plano alimentar, peso e medidas, água, corridas e lembretes. A conta do Google continua sua; só o ritmo esquece você.
         </p>
         <p className="legenda" style={{ margin: 0 }}>Quer guardar algo antes? Use “Baixar uma cópia dos meus dados”.</p>
         <div className="campo">
@@ -465,6 +429,7 @@ function CartaoLembretes() {
     demo: "No modo demonstração as notificações ficam desligadas.",
     "sem-suporte": "Este navegador não recebe notificações. No iPhone, use o ritmo instalado na Tela de Início.",
     instalar: "No iPhone, as notificações só funcionam com o ritmo instalado: no Safari, toque em Compartilhar → Adicionar à Tela de Início e abra por lá.",
+    indisponivel: "As notificações ainda não estão disponíveis neste app.",
     bloqueado: "As notificações estão bloqueadas. Libere em Ajustes → Notificações → ritmo e volte aqui.",
     desligado: "Lembretes de água, das refeições do plano e o resumo da semana, mesmo com o app fechado.",
     ligado: "Ativas neste aparelho. Escolha o que quer receber:",
@@ -512,57 +477,6 @@ function CartaoLembretes() {
       {situacao === "desligado" && (
         <button className="botao cheio" onClick={ativar} disabled={ocupado}>
           <Icone nome="sino" tamanho={18} /> {ocupado ? "Ativando…" : "Ativar notificações"}
-        </button>
-      )}
-    </section>
-  );
-}
-
-/** Conectar o Strava: as corridas gravadas lá entram sozinhas no ritmo. */
-function CartaoStrava() {
-  const { perfil } = useEstado();
-  const avisar = useAvisos();
-  const [buscando, setBuscando] = useState(false);
-  if (!perfil) return null;
-  const conexao = perfil.strava;
-
-  const sincronizar = async () => {
-    setBuscando(true);
-    try {
-      const n = await sincronizarStrava(perfil, true);
-      avisar(n ? `${n} ${n === 1 ? "atividade importada" : "atividades importadas"} do Strava` : "Nenhuma corrida nova no Strava");
-    } catch (e) {
-      avisar((e as Error).message);
-    } finally {
-      setBuscando(false);
-    }
-  };
-
-  return (
-    <section className="card cor-strava">
-      <div className="card-cabeca">
-        <span className="selo-icone"><Icone nome="rota" tamanho={18} /></span>
-        <div className="cresce">
-          <b>Strava</b>
-          <p className="legenda" style={{ margin: 0 }}>
-            {conexao
-              ? `Conectado${conexao.atleta ? ` como ${conexao.atleta}` : ""}. Corridas e caminhadas entram sozinhas, com mapa e parciais.`
-              : "Corra com o Strava (tela bloqueada ou relógio) e as corridas entram aqui sozinhas."}
-          </p>
-        </div>
-      </div>
-      {conexao ? (
-        <div className="grade-2">
-          <button className="botao secundario" onClick={sincronizar} disabled={buscando}>
-            <Icone nome="atualizar" tamanho={18} /> {buscando ? "Buscando…" : "Buscar agora"}
-          </button>
-          <button className="botao texto" onClick={() => { void desconectarStrava(); avisar("Strava desconectado"); }}>
-            Desconectar
-          </button>
-        </div>
-      ) : (
-        <button className="botao cor cor-strava cheio" onClick={conectarStrava}>
-          Conectar com Strava
         </button>
       )}
     </section>

@@ -67,7 +67,7 @@ export function GuiaInicio({ perfil, plano, dias, medidas }: { perfil: Perfil; p
       ir: () => navegar("/corpo?registrar=1"),
     }
   );
-  if (avisos !== "sem-suporte" && avisos !== "demo") {
+  if (avisos !== "sem-suporte" && avisos !== "demo" && avisos !== "indisponivel") {
     passos.push({
       id: "lembretes",
       titulo: "Ative os lembretes",

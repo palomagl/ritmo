@@ -28,7 +28,6 @@ export const PERFIL_PADRAO: Perfil = {
   acordaH: 7,
   dormeH: 22,
   anelComida: "kcal",
-  habitoAguaId: null,
   lembretes: { agua: true, refeicoes: true, semana: true },
   boasVindasFeitas: false,
 };

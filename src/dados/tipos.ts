@@ -35,10 +35,6 @@ export interface Perfil {
   dormeH: number;
   /** O que o anel de comida mostra no Hoje. */
   anelComida: "kcal" | "carbo";
-  /** Hábito do Minha Rotina que marca sozinho ao bater a meta de água. */
-  habitoAguaId: string | null;
-  /** Conexão com o Strava: as corridas de lá entram sozinhas. */
-  strava?: ConexaoStrava | null;
   /** Que lembretes chegam por notificação (valem para todos os aparelhos). */
   lembretes?: PrefsLembretes;
   /** A conta já passou pela limpeza dos dados copiados por engano (v1). */
@@ -61,13 +57,6 @@ export interface InscricaoAviso {
   keys: { p256dh: string; auth: string };
   aparelho: string;
   criadoEm: number;
-}
-
-export interface ConexaoStrava {
-  refreshToken: string;
-  atleta: string;
-  /** Segundos desde 1970 da atividade mais recente já buscada. */
-  ultimaBusca: number | null;
 }
 
 export interface RegistroAgua {
@@ -171,10 +160,8 @@ export interface Corrida {
   kcalEstimada: number;
   /** Rota simplificada, codificada como polyline. */
   rota: string;
-  fonte: "gps" | "gpx" | "strava";
-  /** Id da atividade no Strava, para não importar duas vezes. */
-  stravaId?: number;
-  /** Nome que a atividade tinha no Strava ("Corrida matinal"). */
+  fonte: "gps" | "gpx";
+  /** Nome da atividade ("Corrida matinal"). */
   nome?: string;
 }
 
@@ -188,12 +175,6 @@ export interface Medida {
   aguaPct: number | null;
   cinturaCm: number | null;
   fonte: "manual" | "laudo";
-}
-
-export interface HabitoRotina {
-  id: string;
-  nome: string;
-  icone: string;
 }
 
 export interface Usuario {
@@ -254,11 +235,6 @@ export interface Backend {
   observarMedidas(cb: (m: Medida[]) => void): Cancelar;
   salvarMedida(m: Omit<Medida, "id">): Promise<void>;
   excluirMedida(id: string): Promise<void>;
-
-  // Integrações
-  listarHabitosRotina(): Promise<HabitoRotina[]>;
-  /** Marca o hábito hoje, se ainda não estiver marcado. Devolve se marcou. */
-  marcarHabitoRotina(id: string): Promise<boolean>;
 
   // Notificações
   salvarInscricaoAviso(i: InscricaoAviso): Promise<void>;

@@ -32,7 +32,6 @@ O **ritmo** junta tudo numa tela só e tira o trabalho do caminho:
 
 - **Uma foto do prato** e a IA lista os alimentos, estima porções, calorias e macros, e diz se a refeição está dentro do seu plano.
 - **O plano da nutricionista vira o app.** Mande o PDF ou fotos: a IA organiza as refeições por horário, com as opções de substituição, e as metas do plano passam a ser as metas do dia.
-- **As corridas vêm do Strava**: corra com a tela bloqueada ou com o relógio, e o trajeto, o pace e as parciais aparecem no ritmo.
 - **Água em um toque**, com o ritmo do dia: o app sabe se você está atrasada para a meta, e quanto.
 - **Corpo com contexto**: peso, gordura, músculo e água corporal com gráfico, e uma balança para anotar o peso em segundos.
 - **Lembretes que entendem o seu dia**: notificação de água só quando você está atrás do ritmo, da refeição do plano no horário (se ainda não registrou) e o resumo no domingo à noite.
@@ -58,7 +57,6 @@ O painel do dia. A **linha do tempo** mostra do acordar ao dormir, com um ponto 
 - **Pratos frequentes** com um toque, e fotos sem internet que esperam na fila para analisar depois.
 
 ### Mover
-- **Corridas do Strava**: conecte uma vez e as corridas e caminhadas entram sozinhas, com mapa, pace e parciais por km.
 - **Corrida com GPS** direto no app, quando preferir: mapa da rota, pace atual e médio, parciais, recordes e importação de GPX.
 
 ### Corpo
@@ -108,7 +106,6 @@ Vidro fosco sobre luz azul difusa, tipografia Inter, azul e azul-violeta como ma
 | Banco | Cloud Firestore com cache offline |
 | IA | Firebase AI Logic + Gemini, respostas em JSON por schema, troca de modelo automática se um estiver lotado |
 | Proteção | App Check com Fraud Defense (reCAPTCHA Enterprise) |
-| Corridas | Strava API (OAuth) → função serverless `/api/strava` |
 | Lembretes | Web Push (VAPID) pela função `/api/lembretes`, com Firebase Admin; GitHub Actions chama a cada 30 min |
 | Mapa | Leaflet + OpenStreetMap, com desenho em SVG quando não há internet |
 | Hospedagem | Vercel |
@@ -116,7 +113,7 @@ Vidro fosco sobre luz azul difusa, tipografia Inter, azul e azul-violeta como ma
 As contas (distância por Haversine, filtro de GPS, parciais, ritmo da água, sequências, porções, pontos de atenção, o lembrete do dia, o resumo da semana e quando mandar cada notificação) são funções puras em `src/lib`, cada uma com teste.
 
 ```
-api/            corridas do Strava, lembretes e segurança da conta (com teste)
+api/            lembretes e segurança da conta (com teste)
 src/
   app/          estado global, rotas e ações compartilhadas
   componentes/  linha do dia, balança, gráficos, mapa, navegação, ícones
@@ -164,14 +161,10 @@ Importe o repositório (framework **Vite**) e cadastre as variáveis do `.env.ex
 | `VITE_FIREBASE_AUTH_DOMAIN` | O domínio da **Vercel** (não o `firebaseapp.com`): é o que faz o login funcionar no app instalado no iPhone |
 | `VITE_RECAPTCHA_ENTERPRISE_KEY` | A chave de site usada no App Check |
 | `VITE_GEMINI_MODEL` | Opcional. Padrão `gemini-3.5-flash-lite`, com `gemini-3.5-flash` de reserva |
-| `STRAVA_CLIENT_ID` e `STRAVA_CLIENT_SECRET` | Do app criado em strava.com/settings/api (só no servidor) |
 | `FIREBASE_SERVICE_ACCOUNT` | O JSON da conta de serviço do Firebase, para os lembretes (só no servidor) |
 | `CRON_SECRET` | Opcional. Se definir, use o mesmo valor no segredo do GitHub Actions |
 
 O `vercel.json` encaminha `/__/auth` para o `firebaseapp.com` do projeto. Se trocar de projeto Firebase, troque ali também.
-
-### Strava
-Em **strava.com/settings/api**, crie um app com o domínio da Vercel em *Authorization Callback Domain*. Cadastre o Client ID e o Client Secret na Vercel e, no ritmo, toque em **Perfil → Strava → Conectar**.
 
 ### Lembretes
 1. No Firebase, **Configurações do projeto → Contas de serviço → Gerar nova chave privada**. Abra o arquivo baixado e cole o conteúdo inteiro em `FIREBASE_SERVICE_ACCOUNT` na Vercel. As chaves das notificações saem dele, sem mais nada para gerar.

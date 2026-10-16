@@ -2,8 +2,7 @@
 // Dados de verdade: Firebase Auth + Firestore
 // ==============================================
 // Tudo mora embaixo de users/{uid}. O Ritmo usa coleções com prefixo
-// "pulso" (pulsoDias, pulsoRefeicoes...) para poder dividir o projeto com o
-// Minha Rotina sem colidir com as coleções dele (days, habits...). O perfil
+// "pulso" (pulsoDias, pulsoRefeicoes...). O perfil
 // fica no campo `pulso` do documento users/{uid}.
 //
 // Escritas não são aguardadas até o servidor responder: com o cache offline,
@@ -11,10 +10,8 @@
 // resposta travaria o botão sem internet.
 
 import {
-  GoogleAuthProvider,
   getRedirectResult,
   onAuthStateChanged,
-  signInWithPopup,
   signInWithRedirect,
   signOut,
 } from "firebase/auth";
@@ -39,20 +36,17 @@ import {
   setDoc,
   startAt,
   terminate,
-  updateDoc,
   where,
   writeBatch,
   type DocumentData,
 } from "firebase/firestore";
 import { firebase } from "./firebase";
 import { completarPerfil } from "./padroes";
-import { chaveDia, somarDias } from "@/lib/datas";
 import type {
   Backend,
   Corrida,
   Dia,
   Favorito,
-  HabitoRotina,
   Medida,
   Perfil,
   Plano,
@@ -104,13 +98,6 @@ function limpo<T extends object>(o: T): T {
   return JSON.parse(JSON.stringify(o)) as T;
 }
 
-function ehCelular(): boolean {
-  const standalone =
-    window.matchMedia?.("(display-mode: standalone)").matches ||
-    (navigator as Navigator & { standalone?: boolean }).standalone === true;
-  return standalone || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-}
-
 export function criarFirestore(): Backend {
   const fb = firebase();
 
@@ -127,22 +114,12 @@ export function criarFirestore(): Backend {
     },
 
     /**
-     * No celular (e no app da tela inicial do iPhone) o login é por redirect:
-     * o popup lá não volta. No computador, popup, que não tira a pessoa da
-     * página; se o navegador bloquear, cai no redirect.
+     * Login sempre por redirect (vai para o Google e volta). O popup quebrava
+     * no computador: o Chrome isola a janela do Google, o Firebase achava que
+     * ela tinha sido fechada e mostrava "login cancelado" com ela aberta.
      */
     async entrar() {
-      const provider: GoogleAuthProvider = fb.google;
-      if (ehCelular()) return signInWithRedirect(fb.auth, provider);
-      try {
-        await signInWithPopup(fb.auth, provider);
-      } catch (e) {
-        const code = (e as { code?: string }).code;
-        if (code === "auth/popup-blocked" || code === "auth/operation-not-supported-in-this-environment") {
-          return signInWithRedirect(fb.auth, provider);
-        }
-        throw e;
-      }
+      return signInWithRedirect(fb.auth, fb.google);
     },
 
     async sair() {
@@ -372,49 +349,6 @@ export function criarFirestore(): Backend {
       return semEsperar(deleteDoc(ref("pulsoMedidas", id)), "excluir medida");
     },
 
-    // ------------------------------------------
-    // Minha Rotina (mesmo projeto Firebase)
-    // ------------------------------------------
-    async listarHabitosRotina() {
-      try {
-        const snap = await getDocs(col("habits"));
-        return snap.docs.map((d) => ({ id: d.id, nome: d.data().name ?? "", icone: d.data().icon ?? "✓" }) as HabitoRotina);
-      } catch {
-        return [];
-      }
-    },
-
-    /**
-     * A mesma regra do Minha Rotina (src/lib/habits.ts lá): o hábito guarda
-     * o último dia feito, a sequência e como estava antes (para o desfazer
-     * de lá continuar funcionando). E anota no dia, como o Rotina faz.
-     */
-    async marcarHabitoRotina(id) {
-      const hoje = chaveDia();
-      const snap = await getDoc(ref("habits", id));
-      if (!snap.exists()) return false;
-      const h = snap.data() as { name?: string; icon?: string; streak?: number; lastCompletedOn?: string | null };
-      if (h.lastCompletedOn === hoje) return false;
-      const streak = h.streak ?? 0;
-      const emenda = h.lastCompletedOn === somarDias(hoje, -1);
-      await semEsperar(
-        updateDoc(ref("habits", id), {
-          streak: emenda ? streak + 1 : 1,
-          lastCompletedOn: hoje,
-          undo: { streak, lastCompletedOn: h.lastCompletedOn ?? null },
-        }),
-        "hábito do Rotina"
-      );
-      await semEsperar(
-        setDoc(
-          ref("days", hoje),
-          { habitsCompleted: increment(1), habitos: { [id]: { nome: h.name ?? "", icone: h.icon ?? "💧" } } },
-          { merge: true }
-        ),
-        "dia do Rotina"
-      );
-      return true;
-    },
 
     salvarInscricaoAviso(i) {
       const { id, ...resto } = i;

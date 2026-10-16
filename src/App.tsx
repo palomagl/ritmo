@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useRef, type ReactNode } from "react";
 import { EstadoProvider, AvisosProvider, useAvisos, useEstado } from "@/app/estado";
 import { casar, navegar, useCaminho } from "@/app/rota";
 import { ERRO_CONFIG, MODO_DEMO } from "@/dados";
-import { sincronizarStrava } from "@/lib/strava";
 import { manterAvisos } from "@/lib/avisos";
 import { limparDadosCopiados } from "@/dados/limpeza";
 import { BarraInferior } from "@/componentes/BarraInferior";
@@ -24,7 +23,6 @@ const Perguntar = lazy(() => import("@/telas/Perguntar"));
 const Agua = lazy(() => import("@/telas/Agua"));
 const Corpo = lazy(() => import("@/telas/Corpo"));
 const Perfil = lazy(() => import("@/telas/Perfil"));
-const StravaRetorno = lazy(() => import("@/telas/StravaRetorno"));
 const Semana = lazy(() => import("@/telas/Semana"));
 const Privacidade = lazy(() => import("@/telas/Privacidade"));
 
@@ -64,7 +62,6 @@ const ROTAS: { padrao: string; tela: (p: Record<string, string>) => ReactNode; s
   { padrao: "/perfil", tela: () => <Perfil /> },
   { padrao: "/semana", tela: () => <Semana /> },
   { padrao: "/privacidade", tela: () => <Privacidade />, semBarra: true },
-  { padrao: "/strava", tela: () => <StravaRetorno />, semBarra: true },
 ];
 
 function Conteudo() {
@@ -76,21 +73,6 @@ function Conteudo() {
   // caminho desconhecido volta para o Hoje.
   const conhecido = ROTAS.some((r) => casar(r.padrao, caminho));
 
-  // Corridas do Strava entram sozinhas: ao abrir o app e quando ele volta a
-  // aparecer na tela (no máximo uma busca a cada 20 minutos).
-  const temStrava = Boolean(perfil?.strava?.refreshToken);
-  const perfilAtual = useRef(perfil);
-  perfilAtual.current = perfil;
-  useEffect(() => {
-    if (!temStrava || MODO_DEMO) return;
-    // Sempre o perfil mais novo: o Strava pode trocar o token a cada busca.
-    const buscar = () => perfilAtual.current && void sincronizarStrava(perfilAtual.current).catch((e) => console.warn("Strava:", e));
-    buscar();
-    const aoVoltar = () => document.visibilityState === "visible" && buscar();
-    document.addEventListener("visibilitychange", aoVoltar);
-    return () => document.removeEventListener("visibilitychange", aoVoltar);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [temStrava]);
   // Notificações: o toque numa notificação com o app aberto troca de tela, e
   // a inscrição deste aparelho é conferida a cada login.
   useEffect(() => {

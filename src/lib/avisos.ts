@@ -14,6 +14,7 @@ export type SituacaoAvisos =
   | "sem-suporte" // navegador sem notificações
   | "instalar" // iPhone no Safari: precisa instalar na Tela de Início
   | "bloqueado" // a pessoa negou nas configurações
+  | "indisponivel" // o servidor de lembretes ainda não foi configurado
   | "desligado"
   | "ligado";
 
@@ -37,8 +38,21 @@ async function registro(): Promise<ServiceWorkerRegistration> {
   return navigator.serviceWorker.ready;
 }
 
+/** O servidor de lembretes está pronto? (null = sem internet para saber) */
+let servidorPronto: Promise<boolean | null> | null = null;
+function servidorDisponivel(): Promise<boolean | null> {
+  servidorPronto ??= fetch("/api/lembretes?acao=chave")
+    .then(async (r) => r.ok && Boolean(((await r.json()) as { chave?: string }).chave))
+    .catch(() => {
+      servidorPronto = null;
+      return null;
+    });
+  return servidorPronto;
+}
+
 export async function situacaoAvisos(): Promise<SituacaoAvisos> {
   if (MODO_DEMO) return "demo";
+  if ((await servidorDisponivel()) === false) return "indisponivel";
   if (ehIOS() && !instalado()) return "instalar";
   if (!temSuporte()) return "sem-suporte";
   if (Notification.permission === "denied") return "bloqueado";
