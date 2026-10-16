@@ -116,6 +116,24 @@ export default function Corpo() {
         </>
       )}
 
+      {!medidas.some((m) => m.gorduraPct != null || m.musculoPct != null || m.aguaPct != null) && (
+        <section className="card cor-corpo">
+          <div className="card-cabeca">
+            <span className="selo-icone"><Icone nome="corpo" tamanho={18} /></span>
+            <p className="subtitulo">Gordura, músculo e água corporal</p>
+          </div>
+          <p style={{ margin: 0 }}>
+            Esses números vêm da <b>bioimpedância</b>, um exame rápido que nutricionistas fazem no consultório. Balança de casa com bioimpedância dá uma ideia, mas varia bastante de um dia para o outro.
+          </p>
+          <p className="legenda" style={{ margin: "8px 0 0" }}>
+            Para ter dados exatos e um plano alimentar feito para você, vale consultar uma nutricionista. Com o laudo em mãos, é só tirar uma foto: a IA preenche tudo.
+          </p>
+          <button className="botao secundario cheio" style={{ marginTop: 12, width: "100%" }} onClick={() => setRegistrando(true)}>
+            <Icone nome="camera" tamanho={18} /> Tenho um laudo
+          </button>
+        </section>
+      )}
+
       {perfil.pontosDeAtencao.length > 0 && (
         <section className="card cor-comida">
           <div className="card-cabeca">
