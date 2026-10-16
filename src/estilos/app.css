@@ -1129,6 +1129,68 @@ a {
   background: color-mix(in srgb, var(--texto-suave) 16%, transparent);
 }
 
+/* ---------- Comece por aqui ---------- */
+.guia-inicio {
+  margin-top: 4px;
+  margin-bottom: 14px;
+}
+.guia-barra {
+  height: 6px;
+  border-radius: 3px;
+  margin: 12px 0 6px;
+  background: color-mix(in srgb, var(--pulso) 14%, transparent);
+  overflow: hidden;
+}
+.guia-barra span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--marca-grad);
+  transition: width 0.4s ease;
+}
+.guia-lista {
+  display: grid;
+}
+.guia-passo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 0;
+  border: none;
+  background: none;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.guia-passo + .guia-passo {
+  border-top: 1px solid var(--linha);
+}
+.guia-passo.feito {
+  cursor: default;
+}
+.guia-passo.feito b {
+  color: var(--texto-suave);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--texto-suave) 50%, transparent);
+  font-weight: 600;
+}
+.guia-check {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--pulso) 45%, transparent);
+  color: #fff;
+}
+.guia-passo.feito .guia-check {
+  background: var(--passos);
+  box-shadow: none;
+}
+
 /* ---------- Barras de macro ---------- */
 .macro {
   display: grid;
@@ -1953,6 +2015,16 @@ textarea.entrada {
   .area-proxima { grid-area: proxima; }
   .area-corrida { grid-area: corrida; }
   .area-semana { grid-area: semana; }
+  .area-guia { grid-area: guia; }
+  .hoje:has(> .area-guia) {
+    grid-template-areas:
+      "topo topo"
+      "guia guia"
+      "hero agua"
+      "hero balanca"
+      "lembrete proxima"
+      "corrida semana";
+  }
   .semana-numeros { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
   .semana-graficos { grid-template-columns: 1fr 1fr; gap: 16px; }
   .hoje .rotulo-secao {
@@ -2084,6 +2156,15 @@ textarea.entrada {
       "proxima proxima corrida"
       "semana semana corrida";
     gap: 24px;
+  }
+  .hoje:has(> .area-guia) {
+    grid-template-areas:
+      "topo topo topo"
+      "guia guia guia"
+      "hero agua agua"
+      "hero lembrete balanca"
+      "proxima proxima corrida"
+      "semana semana corrida";
   }
   .hoje .saudacao {
     font-size: 60px;

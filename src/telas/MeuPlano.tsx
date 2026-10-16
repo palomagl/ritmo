@@ -7,6 +7,7 @@ import { dados, type Plano, type RefeicaoPlano, type TipoRefeicao } from "@/dado
 import { ia, ErroIA } from "@/ia";
 import { useAvisos, useEstado } from "@/app/estado";
 import { Esqueleto, Topo, Vazio } from "@/componentes/basicos";
+import { navegar } from "@/app/rota";
 import { Icone } from "@/componentes/Icone";
 import { arquivoParaBase64, reduzirParaBase64 } from "@/lib/aparelho";
 import { NOMES_REFEICAO, ORDEM_REFEICOES } from "@/lib/nutricao";
@@ -115,6 +116,12 @@ export default function MeuPlano() {
                 texto="PDF ou fotos das páginas. A IA organiza por refeição e horário, e você confere tudo antes de salvar."
                 acao={<button className="botao cor cor-comida" onClick={() => entrada.current?.click()}><Icone nome="enviar" tamanho={18} /> Enviar plano</button>}
               />
+              <p className="legenda" style={{ textAlign: "center", margin: "4px 0 0" }}>
+                Ainda não tem nutricionista?{" "}
+                <a href="/perfil" onClick={(e) => { e.preventDefault(); navegar("/perfil"); }} style={{ color: "var(--pulso-texto)", fontWeight: 600 }}>
+                  Calcule suas calorias em Perfil → Metas
+                </a>
+              </p>
             </div>
           ) : (
             <>

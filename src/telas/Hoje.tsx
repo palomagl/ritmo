@@ -6,6 +6,7 @@ import { Link, navegar } from "@/app/rota";
 import { Esqueleto } from "@/componentes/basicos";
 import { PulsoDoDia, type EventoDia } from "@/componentes/PulsoDoDia";
 import { CardBalanca } from "@/componentes/Balanca";
+import { GuiaInicio } from "@/componentes/GuiaInicio";
 import { Icone, type NomeIcone } from "@/componentes/Icone";
 import { RotaSvg } from "@/componentes/Mapa";
 import { chaveDia, dataPorExtenso, saudacao, somarDias } from "@/lib/datas";
@@ -100,6 +101,8 @@ export default function Hoje() {
           <i className="avatar-ponto" aria-hidden="true" />
         </Link>
       </header>
+
+      <GuiaInicio perfil={perfil} plano={plano} dias={dias} medidas={medidas} />
 
       <section className="card hero-dia area-hero" aria-label="Resumo do dia">
         <div className="hero-cabeca">
