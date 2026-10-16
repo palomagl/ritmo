@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { dados, MODO_DEMO, type HabitoRotina, type Metas, type PrefsLembretes, type Tema } from "@/dados";
 import { useAvisos, useEstado } from "@/app/estado";
 import { Folha, Topo } from "@/componentes/basicos";
@@ -6,6 +6,7 @@ import { Icone } from "@/componentes/Icone";
 import { Link } from "@/app/rota";
 import { CalcularCalorias } from "@/componentes/CalcularCalorias";
 import { apagarConta, sairDaConta, sairDeTodosOsAparelhos } from "@/lib/conta";
+import { lerCopia, medidasAtuais, restaurarCopia, type CopiaParaRestaurar } from "@/lib/importar";
 import { conectarStrava, desconectarStrava, sincronizarStrava } from "@/lib/strava";
 import { ativarAvisos, desativarAvisos, situacaoAvisos, testarAviso, type SituacaoAvisos } from "@/lib/avisos";
 import { formatarMl } from "@/lib/agua";
@@ -34,6 +35,18 @@ export default function Perfil() {
   });
   const [editandoMetas, setEditandoMetas] = useState(false);
   const [apagando, setApagando] = useState(false);
+  const [copia, setCopia] = useState<CopiaParaRestaurar | null>(null);
+  const [restaurando, setRestaurando] = useState(false);
+  const arquivoCopia = useRef<HTMLInputElement>(null);
+
+  const abrirCopia = async (f: File | undefined) => {
+    if (!f) return;
+    try {
+      setCopia(lerCopia(await f.text(), await medidasAtuais()));
+    } catch (e) {
+      avisar((e as Error).message);
+    }
+  };
   const [habitos, setHabitos] = useState<HabitoRotina[] | null>(null);
 
   useEffect(() => {
@@ -156,6 +169,10 @@ export default function Perfil() {
       <button className="botao contorno" onClick={exportar}>
         <Icone nome="baixar" tamanho={18} /> Baixar uma cópia dos meus dados
       </button>
+      <button className="botao contorno" onClick={() => arquivoCopia.current?.click()}>
+        <Icone nome="enviar" tamanho={18} /> Restaurar de uma cópia
+      </button>
+      <input ref={arquivoCopia} type="file" accept=".json,application/json" hidden onChange={(e) => { void abrirCopia(e.target.files?.[0]); e.target.value = ""; }} />
       <BotaoConfirmar
         texto="Sair de todos os aparelhos"
         confirmar="Toque de novo para sair de todos"
@@ -179,6 +196,41 @@ export default function Perfil() {
 
       <EditarMetas aberto={editandoMetas} aoFechar={() => setEditandoMetas(false)} metas={m} copos={perfil.copos} acordaH={perfil.acordaH} dormeH={perfil.dormeH} aoSalvar={() => avisar("Metas salvas")} />
       <ApagarConta aberto={apagando} aoFechar={() => setApagando(false)} />
+      <Folha aberta={copia !== null} aoFechar={() => setCopia(null)} titulo="Restaurar de uma cópia">
+        {copia && (
+          <div className="pilha">
+            <p style={{ margin: 0 }}>Isto volta para o app:</p>
+            <ul style={{ margin: 0, paddingLeft: 20, display: "grid", gap: 6 }}>
+              {copia.plano && <li>Plano alimentar com {copia.plano.refeicoes.length} refeições (substitui o atual, se houver)</li>}
+              {copia.medidas.length > 0 && <li>{copia.medidas.length === 1 ? "1 medida do corpo" : `${copia.medidas.length} medidas do corpo`}</li>}
+              {copia.metas && (
+                <li>
+                  Metas: {[copia.metas.kcal && `${milhar(copia.metas.kcal)} kcal`, copia.metas.proteinaG && `proteína ${copia.metas.proteinaG} g`, copia.metas.carboG && `carbo ${copia.metas.carboG} g`, copia.metas.gorduraG && `gordura ${copia.metas.gorduraG} g`, copia.metas.aguaMl && `água ${formatarMl(copia.metas.aguaMl)}`].filter(Boolean).join(" · ")}
+                </li>
+              )}
+            </ul>
+            <p className="legenda" style={{ margin: 0 }}>Refeições, água, corridas e fotos que já estão no app não mudam.</p>
+            <button
+              className="botao cheio"
+              disabled={restaurando}
+              onClick={async () => {
+                setRestaurando(true);
+                try {
+                  await restaurarCopia(copia, perfil.metas);
+                  avisar("Pronto: dados restaurados");
+                  setCopia(null);
+                } catch (e) {
+                  avisar((e as Error).message);
+                } finally {
+                  setRestaurando(false);
+                }
+              }}
+            >
+              {restaurando ? "Restaurando…" : "Restaurar"}
+            </button>
+          </div>
+        )}
+      </Folha>
     </div>
   );
 }
