@@ -71,15 +71,15 @@ describe("resumoDaSemana", () => {
   });
 
   it("compara o peso com a última pesagem antes da semana", () => {
-    const r = resumoDaSemana({ ...base, dias, medidas: [medida("2026-10-01", 60.7), medida("2026-10-13", 60.4), medida("2026-10-15", 60.2)] });
-    expect(r.peso).toEqual({ inicio: 60.7, fim: 60.2, variacao: -0.5 });
+    const r = resumoDaSemana({ ...base, dias, medidas: [medida("2026-10-01", 72.4), medida("2026-10-13", 72.1), medida("2026-10-15", 71.9)] });
+    expect(r.peso).toEqual({ inicio: 72.4, fim: 71.9, variacao: -0.5 });
   });
 
   it("sem pesagem na semana, sem variação", () => {
-    const r = resumoDaSemana({ ...base, dias, medidas: [medida("2026-10-01", 60.7)] });
+    const r = resumoDaSemana({ ...base, dias, medidas: [medida("2026-10-01", 72.4)] });
     expect(r.peso.fim).toBeNull();
     expect(r.peso.variacao).toBeNull();
-    const so1 = resumoDaSemana({ ...base, dias, medidas: [medida("2026-10-13", 60.4)] });
+    const so1 = resumoDaSemana({ ...base, dias, medidas: [medida("2026-10-13", 72.1)] });
     expect(so1.peso.variacao).toBeNull();
   });
 
@@ -98,7 +98,7 @@ describe("conquistas e ajustes", () => {
   ];
 
   it("semana boa: só elogios, nada a ajustar além da pesagem", () => {
-    const r = resumoDaSemana({ ...base, dias: boa, medidas: [medida("2026-10-01", 60.7), medida("2026-10-14", 60.3)] });
+    const r = resumoDaSemana({ ...base, dias: boa, medidas: [medida("2026-10-01", 72.4), medida("2026-10-14", 72.0)] });
     const c = conquistasDaSemana(r, metas);
     expect(c[0].texto).toBe("0,4 kg a menos na balança.");
     expect(c.map((x) => x.cor)).toEqual(["corpo", "comida", "passos"]);

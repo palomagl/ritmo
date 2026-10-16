@@ -331,6 +331,10 @@ export function criarLocal(opcoes: {
       banco.plano = copia(p);
       salvar();
     },
+    async excluirPlano() {
+      banco.plano = null;
+      salvar();
+    },
 
     observarFavoritos: (cb) => observar(() => cb(copia(banco.favoritos))),
     async salvarFavorito(f) {

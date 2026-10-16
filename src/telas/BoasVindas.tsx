@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { dados, MODO_DEMO } from "@/dados";
-import { MEDIDA_INICIAL, METAS_NUTRI, PLANO_PALOMA } from "@/dados/paloma";
+import { dados } from "@/dados";
 import { useEstado } from "@/app/estado";
 import { navegar } from "@/app/rota";
 import { Icone, Marca } from "@/componentes/Icone";
 
 /** Primeiro acesso, em 3 passos curtos. Tudo dá para mudar depois no Perfil. */
 export default function BoasVindas() {
-  const { perfil, usuario, plano } = useEstado();
+  const { perfil, usuario } = useEstado();
   const [passo, setPasso] = useState(1);
   const [altura, setAltura] = useState(perfil?.alturaCm ? String(perfil.alturaCm) : "");
   const [peso, setPeso] = useState(perfil?.pesoKg ? String(perfil.pesoKg) : "");
@@ -17,18 +16,13 @@ export default function BoasVindas() {
   const aguaSugerida = Number.isFinite(pesoN) && pesoN > 30 ? Math.round((pesoN * 35) / 100) * 100 : 2000;
   const [passos, setPassos] = useState(String(perfil?.metas.passos ?? 8000));
   const [agua, setAgua] = useState<string | null>(null);
+  const [kcal, setKcal] = useState(String(perfil?.metas.kcal ?? 1800));
 
   const concluir = async (irParaPlano: boolean) => {
-    // Primeiro acesso sem plano: já entra o plano da nutricionista, a meta de
-    // 1.500 kcal e a bioimpedância (ver dados/paloma.ts).
-    const semPlano = plano === null && !MODO_DEMO;
-    if (semPlano) {
-      await dados.salvarPlano({ ...PLANO_PALOMA, atualizadoEm: Date.now() });
-      await dados.salvarMedida(MEDIDA_INICIAL);
-    }
+    // Cada conta começa vazia: só o que a própria pessoa preencher aqui.
     const metas = {
       ...perfil!.metas,
-      ...(semPlano ? METAS_NUTRI : {}),
+      kcal: Math.min(6000, Math.max(800, parseInt(kcal, 10) || perfil!.metas.kcal)),
       passos: Math.max(1000, parseInt(passos, 10) || 8000),
       aguaMl: Math.max(500, parseInt(agua ?? String(aguaSugerida), 10) || aguaSugerida),
     };
@@ -38,6 +32,7 @@ export default function BoasVindas() {
       pesoKg: Number.isFinite(pesoN) ? pesoN : null,
       nascimento: nascimento || null,
       metas,
+      limpezaV1: true,
       boasVindasFeitas: true,
     });
     navegar(irParaPlano ? "/comer/plano" : "/", { substituir: true });
@@ -94,6 +89,14 @@ export default function BoasVindas() {
             </div>
             <input className="entrada num" inputMode="numeric" value={agua ?? String(aguaSugerida)} onChange={(e) => setAgua(e.target.value)} aria-label="Meta de água em ml" />
             <p className="legenda" style={{ margin: "8px 0 0" }}>Sugestão pelo seu peso (≈35 ml por kg). Vale confirmar com quem te acompanha.</p>
+          </div>
+          <div className="card cor-comida">
+            <div className="card-cabeca">
+              <span className="selo-icone"><Icone nome="comer" tamanho={18} /></span>
+              <span className="subtitulo">Calorias por dia (kcal)</span>
+            </div>
+            <input className="entrada num" inputMode="numeric" value={kcal} onChange={(e) => setKcal(e.target.value)} aria-label="Meta de calorias por dia" />
+            <p className="legenda" style={{ margin: "8px 0 0" }}>Se a sua nutricionista passou um valor, use ele. Ao enviar o plano, as metas dele valem.</p>
           </div>
           <div className="linha" style={{ marginTop: 12 }}>
             <button className="botao secundario" onClick={() => setPasso(1)}>Voltar</button>

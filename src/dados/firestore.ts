@@ -300,6 +300,10 @@ export function criarFirestore(): Backend {
       return semEsperar(setDoc(ref("pulsoPlano", "atual"), limpo(p)), "plano");
     },
 
+    excluirPlano() {
+      return semEsperar(deleteDoc(ref("pulsoPlano", "atual")), "excluir plano");
+    },
+
     // ------------------------------------------
     // Favoritos
     // ------------------------------------------

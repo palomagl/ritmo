@@ -41,6 +41,8 @@ export interface Perfil {
   strava?: ConexaoStrava | null;
   /** Que lembretes chegam por notificação (valem para todos os aparelhos). */
   lembretes?: PrefsLembretes;
+  /** A conta já passou pela limpeza dos dados copiados por engano (v1). */
+  limpezaV1?: boolean;
   boasVindasFeitas: boolean;
 }
 
@@ -241,6 +243,7 @@ export interface Backend {
   // Plano alimentar
   observarPlano(cb: (p: Plano | null) => void): Cancelar;
   salvarPlano(p: Plano): Promise<void>;
+  excluirPlano(): Promise<void>;
 
   // Pratos frequentes
   observarFavoritos(cb: (f: Favorito[]) => void): Cancelar;

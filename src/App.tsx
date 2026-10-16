@@ -1,9 +1,10 @@
 import { lazy, Suspense, useEffect, useRef, type ReactNode } from "react";
-import { EstadoProvider, AvisosProvider, useEstado } from "@/app/estado";
+import { EstadoProvider, AvisosProvider, useAvisos, useEstado } from "@/app/estado";
 import { casar, navegar, useCaminho } from "@/app/rota";
 import { ERRO_CONFIG, MODO_DEMO } from "@/dados";
 import { sincronizarStrava } from "@/lib/strava";
 import { manterAvisos } from "@/lib/avisos";
+import { limparDadosCopiados } from "@/dados/limpeza";
 import { BarraInferior } from "@/componentes/BarraInferior";
 import { Marca } from "@/componentes/Icone";
 import { Esqueleto } from "@/componentes/basicos";
@@ -66,7 +67,8 @@ const ROTAS: { padrao: string; tela: (p: Record<string, string>) => ReactNode; s
 ];
 
 function Conteudo() {
-  const { usuario, carregandoConta, perfil } = useEstado();
+  const { usuario, carregandoConta, perfil, plano } = useEstado();
+  const avisar = useAvisos();
   const caminho = useCaminho();
 
   // Atalhos antigos ou digitados: /mover vai para os passos; qualquer
@@ -103,6 +105,22 @@ function Conteudo() {
   useEffect(() => {
     if (uid) void manterAvisos().catch((e) => console.warn("Notificações:", e));
   }, [uid]);
+
+  // Contas criadas nas primeiras versões receberam dados de exemplo da dona
+  // do app (plano, metas de comida, bioimpedância). Uma vez por conta, saem.
+  const limpando = useRef(false);
+  const precisaLimpar = Boolean(usuario && perfil?.boasVindasFeitas && !perfil.limpezaV1 && plano !== undefined && !MODO_DEMO);
+  useEffect(() => {
+    if (!precisaLimpar || limpando.current || !usuario || !perfil) return;
+    limpando.current = true;
+    void limparDadosCopiados(usuario, perfil, plano ?? null)
+      .then((mexeu) => mexeu && avisar("Ajustamos sua conta: agora ela só tem os seus dados. Envie seu plano alimentar em Comer.", undefined, 8000))
+      .catch((e) => {
+        limpando.current = false;
+        console.warn("Limpeza da conta:", e);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [precisaLimpar]);
 
   useEffect(() => {
     if (caminho === "/mover") navegar("/mover/passos", { substituir: true });
