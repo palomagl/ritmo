@@ -48,13 +48,6 @@ export function servidor() {
   return { db: getFirestore(app), auth: getAuth(app), vapid };
 }
 
-/** sha-256 em hex: guardamos só a impressão da chave, nunca a chave. */
-export function impressao(texto) {
-  return createHash("sha256").update(String(texto)).digest("hex");
-}
-
-/** Prefixo das chaves dos passos: separa de um token antigo do Firebase. */
-export const PREFIXO_CHAVE = "rtm_";
 
 /**
  * Quem está chamando, pelo token do login (Authorization: Bearer ...).

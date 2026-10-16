@@ -93,16 +93,16 @@ export function faltaNoRitmo(bebido, meta, h, acordaH, dormeH) {
 
 /**
  * Resumo curto da semana para o aviso de domingo.
- * @param dias documentos de pulsoDias da semana ({ passos, aguaMl, kcal })
+ * @param dias documentos de pulsoDias da semana ({ aguaMl, kcal })
  */
 export function frasesDaSemana(dias, metas) {
-  const comPassos = dias.filter((d) => (d.passos ?? 0) > 0);
-  const media = comPassos.length ? comPassos.reduce((s, d) => s + d.passos, 0) / comPassos.length : 0;
   const comComida = dias.filter((d) => (d.kcal ?? 0) > 0);
   const dentro = comComida.filter((d) => d.kcal <= metas.kcal * 1.05).length;
+  const comAgua = dias.filter((d) => (d.aguaMl ?? 0) > 0);
+  const naMeta = comAgua.filter((d) => d.aguaMl >= (metas.aguaMl ?? 2000)).length;
   const partes = [];
-  if (media > 0) partes.push(`média de ${milhar(media)} passos`);
   if (comComida.length > 0) partes.push(`${dentro} ${dentro === 1 ? "dia" : "dias"} dentro das ${milhar(metas.kcal)} kcal`);
+  if (comAgua.length > 0) partes.push(`água na meta em ${naMeta} ${naMeta === 1 ? "dia" : "dias"}`);
   if (partes.length === 0) return "Veja como foi e o que dá para ajustar na próxima.";
   const frase = partes.join(" e ");
   return `${frase.charAt(0).toUpperCase()}${frase.slice(1)}. Veja o que dá para ajustar.`;
@@ -195,7 +195,7 @@ export function decidir(c) {
       aviso: {
         tag: "semana",
         titulo: "Sua semana no ritmo",
-        corpo: frasesDaSemana(semana, { kcal: metas.kcal ?? 1500 }),
+        corpo: frasesDaSemana(semana, { kcal: metas.kcal ?? 1500, aguaMl: metas.aguaMl ?? 2000 }),
         url: "/semana",
       },
     };

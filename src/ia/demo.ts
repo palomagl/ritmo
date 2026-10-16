@@ -75,7 +75,7 @@ export function criarIADemo(): IA {
       return [
         "Nos dias que passaram das calorias, o lanche da tarde foi o maior: troque por iogurte natural com fruta, como está no plano.",
         "Comece o dia com 500 ml de água logo ao acordar: é a forma mais fácil de chegar à meta antes do almoço.",
-        "Mantenha as caminhadas depois do almoço: foram os dias com mais passos da semana.",
+        "Mantenha as caminhadas depois do almoço: elas ajudam a fechar o dia sem fome no fim da tarde.",
       ];
     },
   };

@@ -7,7 +7,7 @@ const SECOES: { icone: NomeIcone; cor: string; titulo: string; texto: string[] }
     cor: "passos",
     titulo: "Seus dados são só seus",
     texto: [
-      "Você entra com a sua conta do Google e tudo o que registra fica guardado na sua conta: refeições e fotos, plano alimentar, peso e medidas, água, passos e corridas.",
+      "Você entra com a sua conta do Google e tudo o que registra fica guardado na sua conta: refeições e fotos, plano alimentar, peso e medidas, água e corridas.",
       "As regras do banco de dados só deixam a dona da conta ler e mudar esses dados. Outra pessoa que usa o ritmo não vê nada seu, nem você o dela.",
       "Os dados ficam no Firebase, do Google, em servidores em São Paulo, com conexão criptografada.",
     ],
@@ -23,11 +23,10 @@ const SECOES: { icone: NomeIcone; cor: string; titulo: string; texto: string[] }
     ],
   },
   {
-    icone: "pegadas",
-    cor: "passos",
-    titulo: "Passos, Strava e notificações",
+    icone: "rota",
+    cor: "pulso",
+    titulo: "Strava e notificações",
     texto: [
-      "O Atalho do iPhone usa uma chave que só serve para mandar passos. Mesmo que alguém a veja, não lê nada da sua conta. Gerar outra desliga a anterior.",
       "O Strava só é usado se você conectar, e só para ler corridas e caminhadas. Dá para desconectar no Perfil.",
       "As notificações saem do servidor do ritmo, que olha só o necessário: água do dia, horários do plano e as refeições registradas.",
     ],

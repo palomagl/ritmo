@@ -1,13 +1,10 @@
-import { useMemo, useRef, useState } from "react";
-import { dados, type Corrida, type Dia } from "@/dados";
+import { useMemo, useRef } from "react";
+import { dados, type Corrida } from "@/dados";
 import { useAvisos, useEstado, useObservar } from "@/app/estado";
 import { Link, navegar } from "@/app/rota";
-import { Anel, Esqueleto, Folha, Vazio } from "@/componentes/basicos";
-import { GraficoBarras } from "@/componentes/Graficos";
+import { Esqueleto, Vazio } from "@/componentes/basicos";
 import { Icone } from "@/componentes/Icone";
-import { dataCurta, horaMinuto, somarDias, ultimosDias, chaveDia, dataDaChave, diaDaSemanaCurto } from "@/lib/datas";
-import { milhar, resumoPassos } from "@/lib/passos";
-import { fracao } from "@/lib/nutricao";
+import { dataCurta, somarDias, chaveDia, dataDaChave, diaDaSemanaCurto } from "@/lib/datas";
 import {
   adivinharTipo,
   calcularParciais,
@@ -22,156 +19,14 @@ import {
   simplificar,
 } from "@/lib/corrida";
 
-export default function Mover({ aba }: { aba: "passos" | "corridas" }) {
+/** Corridas e caminhadas (do Strava, do GPS do app ou de um GPX). */
+export default function Mover() {
   return (
     <div>
       <header className="topo">
         <h1 className="titulo">Mover</h1>
       </header>
-      <div className="segmentos" role="tablist">
-        <button role="tab" aria-selected={aba === "passos"} className={`segmento${aba === "passos" ? " ativo" : ""}`} onClick={() => navegar("/mover/passos", { substituir: true })}>
-          Passos
-        </button>
-        <button role="tab" aria-selected={aba === "corridas"} className={`segmento${aba === "corridas" ? " ativo" : ""}`} onClick={() => navegar("/mover/corridas", { substituir: true })}>
-          Corridas
-        </button>
-      </div>
-      {aba === "passos" ? <Passos /> : <Corridas />}
-    </div>
-  );
-}
-
-// ----------------------------------------------
-// Passos
-// ----------------------------------------------
-
-function Passos() {
-  const { perfil, dia, hoje } = useEstado();
-  const avisar = useAvisos();
-  const [periodo, setPeriodo] = useState<7 | 30>(7);
-  const dias = useObservar<Dia[]>((cb) => dados.observarDias(somarDias(hoje, -60), hoje, cb), [hoje]);
-  const [corrigindo, setCorrigindo] = useState(false);
-  const [diaCorrecao, setDiaCorrecao] = useState(hoje);
-  const [valorCorrecao, setValorCorrecao] = useState("");
-
-  if (!perfil || !dia || !dias) {
-    return (
-      <div className="pilha">
-        <Esqueleto altura={170} raio={22} />
-        <Esqueleto altura={200} raio={22} />
-      </div>
-    );
-  }
-
-  const meta = perfil.metas.passos;
-  const passos = dia.passos ?? 0;
-  const lista = ultimosDias(periodo, hoje);
-  const porId = new Map(dias.map((d) => [d.id, d]));
-  const resumo = resumoPassos(lista, dias, meta, hoje);
-  const nuncaSincronizou = !dias.some((d) => d.passosSyncEm);
-
-  const salvarCorrecao = async () => {
-    const n = parseInt(valorCorrecao.replace(/\D/g, ""), 10);
-    if (!Number.isFinite(n)) return;
-    await dados.definirPassos(diaCorrecao, n);
-    setCorrigindo(false);
-    avisar(`Passos de ${diaCorrecao === hoje ? "hoje" : dataCurta(diaCorrecao)} atualizados`);
-  };
-
-  return (
-    <div className="pilha">
-      <section className="card cor-passos linha" style={{ gap: 18 }}>
-        <Anel cor="passos" fracao={fracao(passos, meta)} valor={`${Math.round(fracao(passos, meta) * 100)}%`} meta="da meta" tamanho={104} espessura={11} />
-        <div className="cresce">
-          <div className="num-grande">{milhar(passos)}</div>
-          <div className="legenda">passos hoje · meta {milhar(meta)}</div>
-          <div className="legenda" style={{ marginTop: 6 }}>
-            {dia.passosSyncEm ? `Sincronizado às ${horaMinuto(dia.passosSyncEm)}` : "Ainda não sincronizou hoje"}
-          </div>
-        </div>
-      </section>
-
-      {nuncaSincronizou && (
-        <Link para="/perfil" className="card card-toque cor-passos linha">
-          <span className="selo-icone"><Icone nome="atualizar" tamanho={18} /></span>
-          <span className="cresce">
-            <b>Ligue os passos do iPhone</b>
-            <br />
-            <span className="legenda">Um Atalho manda o total do app Saúde para cá. Passo a passo no Perfil.</span>
-          </span>
-        </Link>
-      )}
-
-      <section className="card">
-        <div className="linha entre" style={{ marginBottom: 12 }}>
-          <p className="subtitulo">{periodo === 7 ? "Última semana" : "Últimos 30 dias"}</p>
-          <div className="segmentos" style={{ margin: 0, width: 120 }}>
-            <button className={`segmento${periodo === 7 ? " ativo" : ""}`} onClick={() => setPeriodo(7)}>7d</button>
-            <button className={`segmento${periodo === 30 ? " ativo" : ""}`} onClick={() => setPeriodo(30)}>30d</button>
-          </div>
-        </div>
-        <GraficoBarras dias={lista} valores={lista.map((d) => porId.get(d)?.passos ?? 0)} meta={meta} cor="passos" hoje={hoje} formatar={milhar} />
-      </section>
-
-      <div className="grade-2">
-        <div className="card">
-          <div className="legenda">Média por dia</div>
-          <div className="num-medio">{milhar(resumo.media)}</div>
-        </div>
-        <div className="card">
-          <div className="legenda">Melhor dia</div>
-          <div className="num-medio">{resumo.melhor ? milhar(resumo.melhor.passos) : "–"}</div>
-          {resumo.melhor && <div className="legenda">{resumo.melhor.dia === hoje ? "hoje" : `${diaDaSemanaCurto(resumo.melhor.dia)}, ${dataCurta(resumo.melhor.dia)}`}</div>}
-        </div>
-        <div className="card">
-          <div className="legenda">Sequência na meta</div>
-          <div className="num-medio">
-            {resumo.sequencia} <span className="legenda">{resumo.sequencia === 1 ? "dia" : "dias"}</span>
-          </div>
-        </div>
-        <div className="card">
-          <div className="legenda">Dias na meta</div>
-          <div className="num-medio">
-            {resumo.diasNaMeta}
-            <span className="legenda"> de {periodo}</span>
-          </div>
-        </div>
-      </div>
-
-      <button
-        className="botao contorno"
-        onClick={() => {
-          setDiaCorrecao(hoje);
-          setValorCorrecao(String(passos || ""));
-          setCorrigindo(true);
-        }}
-      >
-        <Icone nome="lapis" tamanho={18} /> Corrigir passos de um dia
-      </button>
-
-      <Folha aberta={corrigindo} aoFechar={() => setCorrigindo(false)} titulo="Corrigir passos">
-        <div className="pilha">
-          <div className="campo">
-            <label htmlFor="dia-passos">Dia</label>
-            <input
-              id="dia-passos"
-              className="entrada"
-              type="date"
-              max={hoje}
-              value={diaCorrecao}
-              onChange={(e) => {
-                setDiaCorrecao(e.target.value);
-                setValorCorrecao(String(porId.get(e.target.value)?.passos ?? ""));
-              }}
-            />
-          </div>
-          <div className="campo">
-            <label htmlFor="valor-passos">Passos</label>
-            <input id="valor-passos" className="entrada num" inputMode="numeric" value={valorCorrecao} onChange={(e) => setValorCorrecao(e.target.value)} autoFocus />
-          </div>
-          <button className="botao cheio" onClick={salvarCorrecao}>Salvar</button>
-        </div>
-      </Folha>
+      <Corridas />
     </div>
   );
 }

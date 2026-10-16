@@ -4,7 +4,6 @@ import { mudarPorcao, normalizarItens, proximaRefeicao, refeicaoPelaHora, somarI
 import { chaveDia, somarDias, ultimosDias, idade } from "./datas";
 import { pontosDeAtencao, rumoAMeta, ultimoEVariacao } from "./corpo";
 import { insightDoDia } from "./insights";
-import { resumoPassos } from "./passos";
 import type { Dia, Medida, Metas, Plano } from "@/dados/tipos";
 
 const METAS: Metas = { passos: 8000, aguaMl: 2000, kcal: 1800, carboG: 200, proteinaG: 100, gorduraG: 60, pesoKg: 63, gorduraPct: 26, aguaCorporalPct: 52 };
@@ -120,25 +119,8 @@ describe("insight do dia", () => {
   it("prioriza a água atrasada", () => {
     expect(insightDoDia({ ...base, dia: { id: "x", aguaMl: 300, passos: 9000 }, agoraH: 15 }).id).toBe("agua-ritmo");
   });
-  it("sugere caminhada no fim do dia com poucos passos", () => {
-    expect(insightDoDia({ ...base, dia: { id: "x", aguaMl: 2000, passos: 2000 }, agoraH: 19 }).id).toBe("passos-tarde");
-  });
   it("comemora a sequência de água", () => {
     expect(insightDoDia({ ...base, sequenciaAgua: 3, dia: { id: "x", aguaMl: 2100, passos: 5000 }, agoraH: 16 }).texto).toContain("3 dias");
   });
 });
 
-describe("passos", () => {
-  it("resume o período sem deixar hoje puxar a média", () => {
-    const dias: Dia[] = [
-      { id: "2026-10-12", passos: 9000 },
-      { id: "2026-10-13", passos: 7000 },
-      { id: "2026-10-14", passos: 1000 },
-    ];
-    const r = resumoPassos(["2026-10-12", "2026-10-13", "2026-10-14"], dias, 8000, "2026-10-14");
-    expect(r.media).toBe(8000);
-    expect(r.melhor).toEqual({ dia: "2026-10-12", passos: 9000 });
-    expect(r.diasNaMeta).toBe(1);
-    expect(r.sequencia).toBe(0);
-  });
-});

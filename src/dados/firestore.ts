@@ -206,13 +206,6 @@ export function criarFirestore(): Backend {
       );
     },
 
-    definirPassos(data, passos) {
-      return semEsperar(
-        setDoc(ref("pulsoDias", data), { passos: Math.max(0, Math.round(passos)), passosSyncEm: Timestamp.now() }, { merge: true }),
-        "passos"
-      );
-    },
-
     async registrarAgua(ml, data) {
       // Date.now() e não serverTimestamp(): o Firestore não aceita
       // serverTimestamp dentro de listas.

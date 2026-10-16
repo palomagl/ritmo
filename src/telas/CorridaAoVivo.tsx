@@ -188,7 +188,7 @@ export default function CorridaAoVivo() {
       local.apagar(GUARDADA);
       void soltarTela();
       avisar("Atividade muito curta: não salvei.");
-      voltar("/mover/corridas");
+      voltar("/mover");
       return;
     }
     setEstado("salvando");
@@ -243,7 +243,7 @@ export default function CorridaAoVivo() {
     <div className="ao-vivo">
       <header className="topo" style={{ marginBottom: 6 }}>
         {estado === "preparando" ? (
-          <button className="botao-icone liso" onClick={() => voltar("/mover/corridas")} aria-label="Voltar">
+          <button className="botao-icone liso" onClick={() => voltar("/mover")} aria-label="Voltar">
             <Icone nome="fechar" />
           </button>
         ) : (

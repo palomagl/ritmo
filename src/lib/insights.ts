@@ -30,7 +30,6 @@ export interface ContextoInsight {
 
 export function insightDoDia(c: ContextoInsight): Insight {
   const agua = c.dia.aguaMl ?? 0;
-  const passos = c.dia.passos ?? 0;
   const ritmo = ritmoDaAgua(agua, c.metas.aguaMl, c.agoraH, c.acordaH, c.dormeH);
 
   // 1. Água atrasada (o ponto fraco declarado) vem primeiro.
@@ -54,17 +53,7 @@ export function insightDoDia(c: ContextoInsight): Insight {
     };
   }
 
-  // 3. Fim de tarde com poucos passos.
-  if (c.agoraH >= 18 && passos < c.metas.passos * 0.5) {
-    return {
-      id: "passos-tarde",
-      texto: "Uma caminhada de 20 minutos ajuda a fechar o dia dos passos.",
-      rota: "/mover/passos",
-      cor: "passos",
-    };
-  }
-
-  // 4. Comemorações.
+  // 3. Comemorações.
   if (agua >= c.metas.aguaMl && c.sequenciaAgua >= 2) {
     return {
       id: "agua-sequencia",
@@ -73,14 +62,11 @@ export function insightDoDia(c: ContextoInsight): Insight {
       cor: "agua",
     };
   }
-  if (passos >= c.metas.passos) {
-    return { id: "passos-meta", texto: "Meta de passos batida hoje. Seu corpo agradece.", rota: "/mover/passos", cor: "passos" };
-  }
   if (agua >= c.metas.aguaMl) {
     return { id: "agua-meta", texto: "Meta de água batida. Ótimo dia de hidratação!", rota: "/agua", cor: "agua" };
   }
 
-  // 5. Padrão: o próximo passo mais simples.
+  // 4. Padrão: o próximo passo mais simples.
   if (c.refeicoes.length === 0 && c.agoraH >= 10) {
     return { id: "registrar", texto: "Que tal registrar a próxima refeição? Uma foto basta.", rota: "/comer/foto", cor: "comida" };
   }

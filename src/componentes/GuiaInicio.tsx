@@ -76,15 +76,6 @@ export function GuiaInicio({ perfil, plano, dias, medidas }: { perfil: Perfil; p
       ir: () => navegar("/perfil"),
     });
   }
-  if (ehIPhone()) {
-    passos.push({
-      id: "passos",
-      titulo: "Passos automáticos do iPhone",
-      texto: "Um Atalho manda os passos do app Saúde sozinho.",
-      feito: dias.some((d) => Boolean(d.passosSyncEm)),
-      ir: () => navegar("/perfil"),
-    });
-  }
 
   const feitos = passos.filter((p) => p.feito).length;
   if (feitos === passos.length) return null;

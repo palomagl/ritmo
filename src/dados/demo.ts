@@ -279,10 +279,6 @@ export function criarLocal(opcoes: {
     observarDia: (data, cb) => observar(() => cb(copia(banco.dias[data] ?? { id: data }))),
     observarDias: (inicio, fim, cb) =>
       observar(() => cb(Object.values(banco.dias).filter((d) => d.id >= inicio && d.id <= fim).sort((a, b) => a.id.localeCompare(b.id)).map(copia))),
-    async definirPassos(data, passos) {
-      Object.assign(dia(data), { passos, passosSyncEm: Date.now() });
-      salvar();
-    },
     async registrarAgua(ml, data) {
       const r = { ml, em: Date.now() };
       const d = dia(data);

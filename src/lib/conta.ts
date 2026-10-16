@@ -26,12 +26,6 @@ async function chamar(acao: string, corpo?: unknown): Promise<Record<string, unk
   return j;
 }
 
-/** Nova chave do Atalho dos passos. A anterior para de funcionar. */
-export async function gerarChavePassos(): Promise<string> {
-  if (MODO_DEMO) return "rtm_exemplo-da-chave-dos-passos";
-  return String((await chamar("chave-passos")).chave);
-}
-
 /** Apaga deste aparelho tudo o que a conta deixou: cache, fila de fotos, preferências. */
 export async function limparAparelho(): Promise<void> {
   try {
@@ -63,7 +57,7 @@ export async function sairDaConta(): Promise<void> {
   window.location.replace("/");
 }
 
-/** Encerra a sessão em todos os aparelhos (inclusive os Atalhos antigos com token de login). */
+/** Encerra a sessão em todos os aparelhos. */
 export async function sairDeTodosOsAparelhos(): Promise<void> {
   if (MODO_DEMO) return;
   await chamar("sair-de-tudo");

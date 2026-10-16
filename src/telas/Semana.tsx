@@ -3,7 +3,7 @@ import { dados, type Corrida, type Dia, type Medida } from "@/dados";
 import { ia, ErroIA } from "@/ia";
 import { useAgoraH, useEstado, useObservar } from "@/app/estado";
 import { navegar } from "@/app/rota";
-import { BarraMacro, Esqueleto, Topo } from "@/componentes/basicos";
+import { Esqueleto, Topo } from "@/componentes/basicos";
 import { GraficoBarras } from "@/componentes/Graficos";
 import { Icone, type NomeIcone } from "@/componentes/Icone";
 import { diaDaSemanaCurto, somarDias } from "@/lib/datas";
@@ -23,7 +23,7 @@ import {
 } from "@/lib/semana";
 
 const ICONE_COR: Record<Observacao["cor"], NomeIcone> = {
-  passos: "pegadas",
+  passos: "raio",
   agua: "gota",
   comida: "comer",
   corpo: "balanca",
@@ -143,7 +143,13 @@ export default function Semana() {
                 )
               }
             />
-            <Numero cor="passos" icone="pegadas" nome="Passos" valor={milhar(r.passos.media)} detalhe={`por dia · ${r.passos.diasNaMeta} na meta`} />
+            <Numero
+              cor="passos"
+              icone="raio"
+              nome="Proteína"
+              valor={r.comida.mediaProteina > 0 ? `${r.comida.mediaProteina} g` : "—"}
+              detalhe={`por dia · meta ${m.proteinaG} g`}
+            />
             <Numero
               cor="comida"
               icone="comer"
@@ -178,32 +184,18 @@ export default function Semana() {
               <span><i className="dia-acima" /> acima</span>
               <span><i className="dia-pouco" /> registro incompleto</span>
             </div>
-            {r.comida.mediaProteina > 0 && (
-              <div style={{ marginTop: 14 }}>
-                <BarraMacro nome="Proteína média por dia" atual={r.comida.mediaProteina} meta={m.proteinaG} cor="comida" />
-              </div>
-            )}
           </section>
 
-          <div className="semana-graficos">
-            <section className="card cor-passos">
-              <div className="linha entre" style={{ marginBottom: 6 }}>
-                <p className="subtitulo">Passos</p>
-                {r.passos.melhor && <span className="legenda">melhor: {diaDaSemanaCurto(r.passos.melhor.dia)}, {milhar(r.passos.melhor.passos)}</span>}
-              </div>
-              <GraficoBarras dias={r.dias} valores={r.passos.valores} meta={m.passos} cor="passos" hoje={hoje} formatar={milhar} altura={140} />
-            </section>
-            <section className="card cor-agua">
-              <div className="linha entre" style={{ marginBottom: 6 }}>
-                <p className="subtitulo">Água</p>
-                <span className="legenda">média {formatarMl(r.agua.media)}</span>
-              </div>
-              <GraficoBarras dias={r.dias} valores={r.agua.valores} meta={m.aguaMl} cor="agua" hoje={hoje} formatar={formatarMl} altura={140} />
-            </section>
-          </div>
+          <section className="card cor-agua">
+            <div className="linha entre" style={{ marginBottom: 6 }}>
+              <p className="subtitulo">Água</p>
+              <span className="legenda">média {formatarMl(r.agua.media)}</span>
+            </div>
+            <GraficoBarras dias={r.dias} valores={r.agua.valores} meta={m.aguaMl} cor="agua" hoje={hoje} formatar={formatarMl} altura={140} />
+          </section>
 
           {r.corridas.n > 0 && (
-            <button className="card card-toque linha cor-pulso" onClick={() => navegar("/mover/corridas")}>
+            <button className="card card-toque linha cor-pulso" onClick={() => navegar("/mover")}>
               <span className="selo-icone"><Icone nome="rota" tamanho={18} /></span>
               <span className="cresce">
                 <b>{r.corridas.n} {r.corridas.n === 1 ? "corrida ou caminhada" : "corridas e caminhadas"}</b>

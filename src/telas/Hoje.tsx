@@ -55,7 +55,7 @@ export default function Hoje() {
   }
 
   const m = perfil.metas;
-  const passos = dia.passos ?? 0;
+  const proteina = dia.proteinaG ?? 0;
   const agua = dia.aguaMl ?? 0;
   const comidaCarbo = perfil.anelComida === "carbo";
   const comida = comidaCarbo ? dia.carboG ?? 0 : dia.kcal ?? 0;
@@ -118,12 +118,12 @@ export default function Hoje() {
         <div className="metricas-dia">
           <Metrica
             cor="passos"
-            icone="pegadas"
-            nome="Passos"
-            valor={milhar(passos)}
-            meta={`de ${milhar(m.passos)}`}
-            fracao={fracao(passos, m.passos)}
-            onClick={() => navegar("/mover/passos")}
+            icone="raio"
+            nome="Proteína"
+            valor={`${Math.round(proteina)} g`}
+            meta={`de ${m.proteinaG} g`}
+            fracao={fracao(proteina, m.proteinaG)}
+            onClick={() => navegar("/comer")}
           />
           <Metrica
             cor="agua"
@@ -253,7 +253,7 @@ export default function Hoje() {
                 <span className="legenda">
                   {semana.fechados === 0
                     ? "A semana começou agora: os números aparecem a partir de amanhã."
-                    : `${semana.comida.diasDentro} de ${semana.fechados} dias no plano · ${milhar(semana.passos.media)} passos/dia`}
+                    : `${semana.comida.diasDentro} de ${semana.fechados} dias no plano · água na meta em ${semana.agua.diasNaMeta}`}
                 </span>
               </span>
               <Icone nome="seta" tamanho={18} className="suave" />
@@ -288,7 +288,7 @@ function fraseDoDia(chave: string): string {
 
 /** Deixa os números do lembrete em negrito ("Faltam **900 ml** para..."). */
 function destacarNumeros(texto: string): ReactNode[] {
-  return texto.split(/(\d[\d.,]*\s?(?:ml|L|kcal|g|km|passos|min)?\b)/).map((parte, i) => (i % 2 === 1 ? <b key={i}>{parte}</b> : parte));
+  return texto.split(/(\d[\d.,]*\s?(?:ml|L|kcal|g|km|min)?\b)/).map((parte, i) => (i % 2 === 1 ? <b key={i}>{parte}</b> : parte));
 }
 
 function Metrica({ cor, icone, nome, valor, meta, fracao, onClick }: { cor: string; icone: NomeIcone; nome: string; valor: string; meta: string; fracao: number; onClick: () => void }) {

@@ -89,9 +89,9 @@ describe("decidir", () => {
 
   it("manda o resumo no domingo à noite, uma vez", () => {
     const domingo = { agora: { hoje: "2026-10-18", h: 19.5, diaSemana: 0 }, agoraMs: 0, perfil, plano: null, dia: { aguaMl: 2000 } };
-    const r = decidir({ ...domingo, semana: [{ passos: 8000, kcal: 1400 }, { passos: 6000, kcal: 1700 }] });
+    const r = decidir({ ...domingo, semana: [{ aguaMl: 2100, kcal: 1400 }, { aguaMl: 1500, kcal: 1700 }] });
     expect(r.aviso?.url).toBe("/semana");
-    expect(r.aviso?.corpo).toBe("Média de 7.000 passos e 1 dia dentro das 1.500 kcal. Veja o que dá para ajustar.");
+    expect(r.aviso?.corpo).toBe("1 dia dentro das 1.500 kcal e água na meta em 1 dia. Veja o que dá para ajustar.");
     expect(decidir({ ...domingo, estado: r.estado }).aviso).toBeNull();
   });
 

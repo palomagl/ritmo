@@ -223,7 +223,6 @@ export interface Backend {
   // Dias (passos, água, totais de comida)
   observarDia(data: string, cb: (d: Dia) => void): Cancelar;
   observarDias(inicio: string, fim: string, cb: (dias: Dia[]) => void): Cancelar;
-  definirPassos(data: string, passos: number): Promise<void>;
   registrarAgua(ml: number, data: string): Promise<RegistroAgua>;
   desfazerAgua(registro: RegistroAgua, data: string): Promise<void>;
 

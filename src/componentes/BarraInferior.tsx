@@ -7,7 +7,7 @@ import { useEstado } from "@/app/estado";
 
 const ABAS: { para: string; nome: string; icone: NomeIcone; ativo: (c: string) => boolean }[] = [
   { para: "/", nome: "Hoje", icone: "hoje", ativo: (c) => c === "/" },
-  { para: "/mover/passos", nome: "Mover", icone: "mover", ativo: (c) => c.startsWith("/mover") || c.startsWith("/corrida") },
+  { para: "/mover", nome: "Mover", icone: "mover", ativo: (c) => c.startsWith("/mover") || c.startsWith("/corrida") },
   { para: "/comer", nome: "Comer", icone: "comer", ativo: (c) => c.startsWith("/comer") },
   { para: "/corpo", nome: "Corpo", icone: "corpo", ativo: (c) => c.startsWith("/corpo") },
 ];

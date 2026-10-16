@@ -9,7 +9,7 @@ rules_version = '2';
 //    alcança esse caminho. Ninguém lê nem lista a conta de outra pessoa.
 // 2. Só as coleções que o app usa existem: qualquer outro nome é recusado.
 // 3. Tamanhos com teto, para ninguém lotar o banco com um documento gigante.
-// 4. O que é só do servidor (chaves dos passos, estado dos lembretes) o
+// 4. O que é só do servidor (estado dos lembretes) o
 //    navegador não escreve. O servidor entra com a conta de serviço, que
 //    não passa por estas regras.
 
@@ -56,10 +56,6 @@ service cloud.firestore {
       }
     }
 
-    // Chaves do Atalho dos passos: só o servidor lê e escreve.
-    match /chavesPassos/{id} {
-      allow read, write: if false;
-    }
   }
 }
 

@@ -47,9 +47,7 @@ describe("resumoDaSemana", () => {
   it("conta só os dias que já acabaram nas médias", () => {
     const r = resumoDaSemana({ ...base, dias });
     expect(r.fechados).toBe(3);
-    expect(r.passos.media).toBe(8000);
-    expect(r.passos.diasNaMeta).toBe(2);
-    expect(r.passos.melhor).toEqual({ dia: "2026-10-12", passos: 9000 });
+    expect(r.agua.media).toBe(1867);
     expect(r.agua.diasNaMeta).toBe(2);
   });
 
@@ -118,9 +116,4 @@ describe("conquistas e ajustes", () => {
     expect(a[2].texto).toContain("Água na meta em 1 de 3 dias");
   });
 
-  it("sugere minutos de caminhada proporcionais ao que falta", () => {
-    const poucos = [dia("2026-10-12", { passos: 5000, aguaMl: 2000, kcal: 1400, proteinaG: 126 })];
-    const a = ajustesDaSemana(resumoDaSemana({ ...base, hoje: "2026-10-13", dias: poucos, medidas: [medida("2026-10-12", 60)] }), metas);
-    expect(a[0].texto).toBe("Média de 5.000 passos, 3.000 abaixo da meta. Uns 30 minutos de caminhada por dia fecham essa conta.");
-  });
 });

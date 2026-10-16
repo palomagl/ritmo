@@ -51,8 +51,7 @@ function Carregando() {
 
 const ROTAS: { padrao: string; tela: (p: Record<string, string>) => ReactNode; semBarra?: boolean }[] = [
   { padrao: "/", tela: () => <Hoje /> },
-  { padrao: "/mover/passos", tela: () => <Mover aba="passos" /> },
-  { padrao: "/mover/corridas", tela: () => <Mover aba="corridas" /> },
+  { padrao: "/mover", tela: () => <Mover /> },
   { padrao: "/corrida/ao-vivo", tela: () => <CorridaAoVivo />, semBarra: true },
   { padrao: "/corrida/:id", tela: (p) => <CorridaResumo id={p.id} /> },
   { padrao: "/comer", tela: () => <Comer /> },
@@ -73,7 +72,7 @@ function Conteudo() {
   const avisar = useAvisos();
   const caminho = useCaminho();
 
-  // Atalhos antigos ou digitados: /mover vai para os passos; qualquer
+  // Atalhos antigos ou digitados: /mover/... vai para /mover; qualquer
   // caminho desconhecido volta para o Hoje.
   const conhecido = ROTAS.some((r) => casar(r.padrao, caminho));
 
@@ -125,7 +124,8 @@ function Conteudo() {
   }, [precisaLimpar]);
 
   useEffect(() => {
-    if (caminho === "/mover") navegar("/mover/passos", { substituir: true });
+    // Endereços antigos das abas de Mover.
+    if (caminho.startsWith("/mover/")) navegar("/mover", { substituir: true });
     else if (!conhecido) navegar("/", { substituir: true });
   }, [caminho, conhecido]);
 

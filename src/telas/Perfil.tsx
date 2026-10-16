@@ -5,7 +5,7 @@ import { Folha, Topo } from "@/componentes/basicos";
 import { Icone } from "@/componentes/Icone";
 import { Link } from "@/app/rota";
 import { CalcularCalorias } from "@/componentes/CalcularCalorias";
-import { apagarConta, gerarChavePassos, sairDaConta, sairDeTodosOsAparelhos } from "@/lib/conta";
+import { apagarConta, sairDaConta, sairDeTodosOsAparelhos } from "@/lib/conta";
 import { conectarStrava, desconectarStrava, sincronizarStrava } from "@/lib/strava";
 import { ativarAvisos, desativarAvisos, situacaoAvisos, testarAviso, type SituacaoAvisos } from "@/lib/avisos";
 import { formatarMl } from "@/lib/agua";
@@ -33,7 +33,6 @@ export default function Perfil() {
     }
   });
   const [editandoMetas, setEditandoMetas] = useState(false);
-  const [atalho, setAtalho] = useState(false);
   const [apagando, setApagando] = useState(false);
   const [habitos, setHabitos] = useState<HabitoRotina[] | null>(null);
 
@@ -73,7 +72,6 @@ export default function Perfil() {
       <button className="card card-toque" onClick={() => setEditandoMetas(true)}>
         <div className="linha entre">
           <div className="pilha" style={{ gap: 4 }}>
-            <span><b className="num">{milhar(m.passos)}</b> <span className="suave">passos</span></span>
             <span><b className="num">{formatarMl(m.aguaMl)}</b> <span className="suave">de água</span></span>
             <span><b className="num">{milhar(m.kcal)}</b> <span className="suave">kcal · C {m.carboG} · P {m.proteinaG} · G {m.gorduraG}</span></span>
           </div>
@@ -110,22 +108,12 @@ export default function Perfil() {
         <span className="cresce">
           <b>Resumo da semana</b>
           <br />
-          <span className="legenda">Peso, passos, calorias e o que dá pra ajustar</span>
+          <span className="legenda">Peso, calorias, água e o que dá pra ajustar</span>
         </span>
         <Icone nome="seta" tamanho={18} className="suave" />
       </Link>
 
       <p className="rotulo-secao">Integrações</p>
-      <button className="card card-toque linha cor-passos" onClick={() => setAtalho(true)}>
-        <span className="selo-icone"><Icone nome="pegadas" tamanho={18} /></span>
-        <span className="cresce">
-          <b>Passos do iPhone</b>
-          <br />
-          <span className="legenda">Atalho que manda os passos do app Saúde</span>
-        </span>
-        <Icone nome="seta" tamanho={18} className="suave" />
-      </button>
-
       <CartaoStrava />
 
       <section className="card cor-agua">
@@ -190,7 +178,6 @@ export default function Perfil() {
       <p className="legenda" style={{ textAlign: "center" }}>{`ritmo 1.0${MODO_DEMO ? " · modo demonstração" : ""}`}</p>
 
       <EditarMetas aberto={editandoMetas} aoFechar={() => setEditandoMetas(false)} metas={m} copos={perfil.copos} acordaH={perfil.acordaH} dormeH={perfil.dormeH} aoSalvar={() => avisar("Metas salvas")} />
-      <GuiaAtalho aberto={atalho} aoFechar={() => setAtalho(false)} />
       <ApagarConta aberto={apagando} aoFechar={() => setApagando(false)} />
     </div>
   );
@@ -214,7 +201,6 @@ function EditarMetas({
   aoSalvar: () => void;
 }) {
   const inicial = () => ({
-    passos: String(metas.passos),
     aguaMl: String(metas.aguaMl),
     kcal: String(metas.kcal),
     carboG: String(metas.carboG),
@@ -246,7 +232,6 @@ function EditarMetas({
     <Folha aberta={aberto} aoFechar={aoFechar} titulo="Metas do dia">
       <div className="pilha">
         <div className="grade-2">
-          {campo("passos", "Passos")}
           {campo("aguaMl", "Água (ml)")}
           {campo("kcal", "Calorias (kcal)")}
           {campo("carboG", "Carboidratos (g)")}
@@ -284,7 +269,6 @@ function EditarMetas({
             await dados.salvarPerfil({
               metas: {
                 ...metas,
-                passos: n(v.passos, metas.passos),
                 aguaMl: n(v.aguaMl, metas.aguaMl),
                 kcal: n(v.kcal, metas.kcal),
                 carboG: n(v.carboG, metas.carboG),
@@ -348,7 +332,7 @@ function ApagarConta({ aberto, aoFechar }: { aberto: boolean; aoFechar: () => vo
     <Folha aberta={aberto} aoFechar={aoFechar} titulo="Apagar conta e dados">
       <div className="pilha">
         <p style={{ margin: 0 }}>
-          Vão embora, sem volta: refeições e fotos, plano alimentar, peso e medidas, água, passos, corridas, lembretes e a conexão com o Strava. A conta do Google continua sua; só o ritmo esquece você.
+          Vão embora, sem volta: refeições e fotos, plano alimentar, peso e medidas, água, corridas, lembretes e a conexão com o Strava. A conta do Google continua sua; só o ritmo esquece você.
         </p>
         <p className="legenda" style={{ margin: 0 }}>Quer guardar algo antes? Use “Baixar uma cópia dos meus dados”.</p>
         <div className="campo">
@@ -530,95 +514,5 @@ function CartaoStrava() {
         </button>
       )}
     </section>
-  );
-}
-
-/**
- * Passo a passo do Atalho do iPhone. O Atalho manda os passos com uma chave
- * que só serve para isso (gerada no servidor, guardada só como impressão):
- * se vazar, ninguém lê nada da conta, e gerar outra desliga a anterior.
- */
-function GuiaAtalho({ aberto, aoFechar }: { aberto: boolean; aoFechar: () => void }) {
-  const avisar = useAvisos();
-  const [chave, setChave] = useState<string | null>(null);
-  const [gerando, setGerando] = useState(false);
-
-  useEffect(() => {
-    if (!aberto) setChave(null);
-  }, [aberto]);
-
-  const copiar = async (texto: string, oQue: string) => {
-    try {
-      await navigator.clipboard.writeText(texto);
-      avisar(`${oQue} copiado`);
-    } catch {
-      avisar("Não consegui copiar sozinho: toque e segure no texto para copiar.");
-    }
-  };
-
-  const gerar = async () => {
-    setGerando(true);
-    try {
-      setChave(await gerarChavePassos());
-    } catch (e) {
-      avisar((e as Error).message);
-    } finally {
-      setGerando(false);
-    }
-  };
-
-  // O app recebe os passos em /api/passos: o Atalho só soma e manda.
-  const urlEnviar = `${window.location.origin}/api/passos`;
-
-  const Copiavel = ({ rotulo, valor }: { rotulo: string; valor: string }) => (
-    <div className="campo">
-      <span className="legenda">{rotulo}</span>
-      <div className="linha" style={{ gap: 8 }}>
-        <code className="entrada cresce" style={{ fontSize: 12, wordBreak: "break-all", minHeight: 0, lineHeight: "18px" }}>
-          {valor}
-        </code>
-        <button className="botao-icone" aria-label={`Copiar ${rotulo}`} onClick={() => copiar(valor, rotulo)}>
-          <Icone nome="copiar" tamanho={18} />
-        </button>
-      </div>
-    </div>
-  );
-
-  return (
-    <Folha aberta={aberto} aoFechar={aoFechar} titulo="Passos do iPhone">
-      <div className="pilha">
-        <p className="suave" style={{ margin: 0 }}>
-          O navegador não lê o app Saúde, mas o app <b>Atalhos</b> lê. Crie um atalho chamado <b>Passos pro ritmo</b> com só 3 ações:
-        </p>
-        <ol style={{ paddingLeft: 20, margin: 0, display: "grid", gap: 8 }}>
-          <li><b>Localizar Amostras de Saúde</b>: tipo <b>Passos</b>, Data de Início é <b>Hoje</b>. Se usa Apple Watch, adicione o filtro Fonte é o seu iPhone (senão conta em dobro).</li>
-          <li><b>Calcular Estatísticas</b>: <b>Soma</b>.</li>
-          <li><b>Obter Conteúdo do URL</b>: cole o endereço abaixo, método <b>POST</b>, Corpo da Requisição <b>JSON</b> com dois campos: <code>passos</code> (Número) = Estatísticas, e <code>token</code> (Texto) = a sua chave.</li>
-        </ol>
-        <p className="suave" style={{ margin: 0 }}>
-          Toque em ▶️ para testar: os passos aparecem em Mover. Depois, em <b>Automação → Hora do Dia</b>, crie para 12:00, 18:00, 21:00 e 23:50, com <b>Executar Imediatamente</b>.
-        </p>
-        <Copiavel rotulo="Endereço (URL)" valor={urlEnviar} />
-        {chave ? (
-          <>
-            <Copiavel rotulo="Sua chave dos passos" valor={chave} />
-            <div className="card cor-comida" style={{ padding: 14 }}>
-              <p className="legenda" style={{ margin: 0, color: "var(--texto)" }}>
-                <b>Ela só aparece agora:</b> copie para o Atalho. Se perder, gere outra aqui; a anterior para de funcionar na hora.
-              </p>
-            </div>
-          </>
-        ) : (
-          <div className="card cor-passos" style={{ padding: 14 }}>
-            <p className="legenda" style={{ margin: "0 0 10px", color: "var(--texto)" }}>
-              A chave só serve para mandar passos: mesmo que alguém a veja, não lê nada da sua conta. Já usa o Atalho com o token antigo? Gere a chave e troque no Atalho.
-            </p>
-            <button className="botao cheio" style={{ width: "100%" }} onClick={gerar} disabled={gerando}>
-              <Icone nome="escudo" tamanho={18} /> {gerando ? "Gerando…" : "Gerar minha chave"}
-            </button>
-          </div>
-        )}
-      </div>
-    </Folha>
   );
 }

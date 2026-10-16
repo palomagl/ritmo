@@ -22,7 +22,6 @@ export interface ResumoSemana {
   dias: string[];
   /** Dias que já contam nas médias. */
   fechados: number;
-  passos: { valores: number[]; media: number; diasNaMeta: number; melhor: { dia: string; passos: number } | null };
   agua: { valores: number[]; media: number; diasNaMeta: number };
   comida: {
     porDia: DiaComida[];
@@ -40,7 +39,7 @@ export interface ResumoSemana {
 
 export interface Observacao {
   texto: string;
-  cor: "passos" | "agua" | "comida" | "corpo" | "pulso";
+  cor: "agua" | "comida" | "corpo" | "pulso" | "passos";
 }
 
 /** A segunda-feira da semana de uma data. */
@@ -87,12 +86,10 @@ export function resumoDaSemana(c: {
   const conta = (d: string) => d < hoje || (d === hoje && c.agoraH >= 20);
   const fechados = lista.filter(conta);
 
-  const valor = (d: string, k: "passos" | "aguaMl" | "kcal" | "proteinaG") => porId.get(d)?.[k] ?? 0;
+  const valor = (d: string, k: "aguaMl" | "kcal" | "proteinaG") => porId.get(d)?.[k] ?? 0;
 
-  // Passos e água
-  const passos = lista.map((d) => valor(d, "passos"));
+  // Água
   const agua = lista.map((d) => valor(d, "aguaMl"));
-  const melhor = lista.reduce<ResumoSemana["passos"]["melhor"]>((m, d, i) => (passos[i] > 0 && (!m || passos[i] > m.passos) ? { dia: d, passos: passos[i] } : m), null);
   const baseMedia = fechados.length ? fechados : lista.filter((d) => d <= hoje);
 
   // Comida: até 60% da meta é provável registro pela metade, não um dia leve.
@@ -126,12 +123,6 @@ export function resumoDaSemana(c: {
     domingo,
     dias: lista,
     fechados: fechados.length,
-    passos: {
-      valores: passos,
-      media: Math.round(media(baseMedia.map((d) => valor(d, "passos")))),
-      diasNaMeta: passos.filter((p) => p >= metas.passos).length,
-      melhor,
-    },
     agua: {
       valores: agua,
       media: Math.round(media(baseMedia.map((d) => valor(d, "aguaMl")))),
@@ -157,8 +148,7 @@ export function conquistasDaSemana(r: ResumoSemana, metas: Metas): Observacao[] 
   const lista: Observacao[] = [];
   if (r.peso.variacao != null && r.peso.variacao < 0) lista.push({ cor: "corpo", texto: `${dec(Math.abs(r.peso.variacao))} kg a menos na balança.` });
   if (f >= 3 && r.comida.diasDentro >= Math.ceil(f * 0.7)) lista.push({ cor: "comida", texto: `${r.comida.diasDentro} de ${f} dias dentro das ${milhar(metas.kcal)} kcal.` });
-  if (r.passos.media >= metas.passos) lista.push({ cor: "passos", texto: `Média de ${milhar(r.passos.media)} passos, acima da meta.` });
-  else if (r.passos.melhor && r.passos.melhor.passos >= metas.passos * 1.2) lista.push({ cor: "passos", texto: `Melhor dia: ${milhar(r.passos.melhor.passos)} passos.` });
+  if (r.comida.mediaProteina > 0 && r.comida.mediaProteina >= metas.proteinaG * 0.95) lista.push({ cor: "passos", texto: `Proteína em dia: média de ${r.comida.mediaProteina} g por dia.` });
   if (f >= 3 && r.agua.diasNaMeta >= Math.ceil(f * 0.7)) lista.push({ cor: "agua", texto: `Água na meta em ${r.agua.diasNaMeta} dias.` });
   return lista.slice(0, 3);
 }
@@ -181,12 +171,6 @@ export function ajustesDaSemana(r: ResumoSemana, metas: Metas): Observacao[] {
   if (r.agua.diasNaMeta < Math.ceil(f / 2)) {
     lista.push({ cor: "agua", texto: `Água na meta em ${r.agua.diasNaMeta} de ${f} dias, com média de ${formatarMl(r.agua.media)}. Garrafa à vista e os lembretes ajudam.` });
   }
-  if (r.passos.media > 0 && r.passos.media < metas.passos * 0.85) {
-    const falta = metas.passos - r.passos.media;
-    // ~100 passos por minuto de caminhada.
-    const minutos = Math.min(60, Math.max(5, Math.round(falta / 100 / 5) * 5));
-    lista.push({ cor: "passos", texto: `Média de ${milhar(r.passos.media)} passos, ${milhar(falta)} abaixo da meta. Uns ${minutos} minutos de caminhada por dia fecham essa conta.` });
-  }
   if (r.peso.fim == null) {
     lista.push({ cor: "corpo", texto: "Sem pesagem nesta semana. Uma vez por semana, no mesmo dia e horário, já mostra a tendência." });
   } else if (r.peso.variacao != null && r.peso.variacao >= 0.5) {
@@ -198,14 +182,14 @@ export function ajustesDaSemana(r: ResumoSemana, metas: Metas): Observacao[] {
 /** Texto curto com os números, para a IA comentar. */
 export function textoParaIA(r: ResumoSemana, metas: Metas): string {
   const dias = r.dias
-    .map((d, i) => `${d}: ${r.comida.kcal[i]} kcal (${r.comida.porDia[i]}), ${r.passos.valores[i]} passos, ${r.agua.valores[i]} ml de água`)
+    .map((d, i) => `${d}: ${r.comida.kcal[i]} kcal (${r.comida.porDia[i]}), ${r.agua.valores[i]} ml de água`)
     .join("\n");
   return [
     `Semana de ${r.segunda} a ${r.domingo}. Dias fechados: ${r.fechados}.`,
-    `Metas: ${metas.kcal} kcal, ${metas.proteinaG} g de proteína, ${metas.passos} passos, ${metas.aguaMl} ml de água.`,
+    `Metas: ${metas.kcal} kcal, ${metas.proteinaG} g de proteína, ${metas.aguaMl} ml de água.`,
     `Dias dentro das calorias: ${r.comida.diasDentro}; acima: ${r.comida.diasAcima}; sem registro ou incompletos: ${r.comida.diasIncompletos}.`,
     `Média nos dias registrados: ${r.comida.mediaKcal} kcal e ${r.comida.mediaProteina} g de proteína.`,
-    `Passos: média ${r.passos.media}, ${r.passos.diasNaMeta} dias na meta. Água: média ${r.agua.media} ml, ${r.agua.diasNaMeta} dias na meta.`,
+    `Água: média ${r.agua.media} ml, ${r.agua.diasNaMeta} dias na meta.`,
     `Peso: ${r.peso.inicio ?? "?"} kg → ${r.peso.fim ?? "sem pesagem"}${r.peso.variacao != null ? ` (${r.peso.variacao > 0 ? "+" : ""}${r.peso.variacao} kg)` : ""}.`,
     `Corridas/caminhadas: ${r.corridas.n}, ${r.corridas.km} km.`,
     `Dia a dia:\n${dias}`,

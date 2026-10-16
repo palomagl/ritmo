@@ -16,7 +16,6 @@ export default function BoasVindas() {
   const pesoN = parseFloat(peso.replace(",", "."));
   // Referência comum de partida: ~35 ml por kg. Arredonda em 100 ml.
   const aguaSugerida = Number.isFinite(pesoN) && pesoN > 30 ? Math.round((pesoN * 35) / 100) * 100 : 2000;
-  const [passos, setPassos] = useState(String(perfil?.metas.passos ?? 8000));
   const [agua, setAgua] = useState<string | null>(null);
   const [kcal, setKcal] = useState("");
   const [calculo, setCalculo] = useState<EstimativaCalorias | null>(null);
@@ -29,7 +28,6 @@ export default function BoasVindas() {
       kcal: Math.min(6000, Math.max(800, parseInt(kcal.replace(/\D/g, ""), 10) || perfil!.metas.kcal)),
       // Macros da calculadora só valem se a pessoa não mudou as calorias depois.
       ...(calculo && String(calculo.kcal) === kcal ? { proteinaG: calculo.proteinaG, carboG: calculo.carboG, gorduraG: calculo.gorduraG } : {}),
-      passos: Math.max(1000, parseInt(passos, 10) || 8000),
       aguaMl: Math.max(500, parseInt(agua ?? String(aguaSugerida), 10) || aguaSugerida),
     };
     await dados.salvarPerfil({
@@ -81,13 +79,6 @@ export default function BoasVindas() {
         <section className="pilha">
           <h1 className="titulo">Suas metas do dia</h1>
           <p className="suave" style={{ margin: 0 }}>Uma sugestão para começar. Se o seu plano alimentar trouxer outras, ele manda.</p>
-          <div className="card cor-passos">
-            <div className="card-cabeca">
-              <span className="selo-icone"><Icone nome="pegadas" tamanho={18} /></span>
-              <span className="subtitulo">Passos</span>
-            </div>
-            <input className="entrada num" inputMode="numeric" value={passos} onChange={(e) => setPassos(e.target.value)} aria-label="Meta de passos" />
-          </div>
           <div className="card cor-agua">
             <div className="card-cabeca">
               <span className="selo-icone"><Icone nome="gota" tamanho={18} /></span>

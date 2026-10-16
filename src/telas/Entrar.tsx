@@ -51,7 +51,7 @@ export default function Entrar() {
         <p className="boas-vindas-frase">
           <b>Beba água. Cuide do seu ritmo.</b>
           <br />
-          Passos, comida, água e corpo num lugar só.
+          Comida, água, corpo e corridas num lugar só.
         </p>
       </div>
       <div className="boas-vindas-acao">

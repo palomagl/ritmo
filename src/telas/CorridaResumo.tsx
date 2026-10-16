@@ -46,7 +46,7 @@ export default function CorridaResumo({ id }: { id: string }) {
   if (corrida === null) {
     return (
       <>
-        <Topo titulo="Corrida" voltarPara="/mover/corridas" />
+        <Topo titulo="Corrida" voltarPara="/mover" />
         <Vazio icone="rota" cor="pulso" titulo="Não encontrei essa corrida" />
       </>
     );
@@ -61,12 +61,12 @@ export default function CorridaResumo({ id }: { id: string }) {
   const excluir = async () => {
     await dados.excluirCorrida(corrida.id);
     avisar("Corrida excluída");
-    navegar("/mover/corridas", { substituir: true });
+    navegar("/mover", { substituir: true });
   };
 
   return (
     <div className="pilha">
-      <Topo titulo={corrida.tipo === "corrida" ? "Corrida" : "Caminhada"} voltarPara="/mover/corridas" />
+      <Topo titulo={corrida.tipo === "corrida" ? "Corrida" : "Caminhada"} voltarPara="/mover" />
       <p className="legenda" style={{ margin: "-14px 0 4px" }}>
         {dataPorExtenso(new Date(corrida.inicio))} · {horaMinuto(corrida.inicio)}
         {corrida.fonte === "gpx" ? " · importada" : corrida.fonte === "strava" ? " · do Strava" : ""}
